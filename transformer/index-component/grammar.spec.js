@@ -4,15 +4,15 @@ import parseComponent from './grammar.js'
 
 describe('component', () => {
   describe('parser', () => {
-    test('empty module', () => {
+    test('empty component', () => {
       const wat = `
         (component
         )
       `
       const parser = Parser()
       const input = parser(wat)
-      const module = parseComponent(input)
-      expect(module).toEqual({
+      const component = parseComponent(input)
+      expect(component).toEqual({
         type: 'component',
         definitions: [],
       })

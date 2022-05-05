@@ -11,20 +11,23 @@ const createComponentConfig = (node, ancestors = [node]) => {
     )
   }
 
+  const components = node.components
+    .filter(
+      ({ type, import: imp, alias }) => type === 'component' && !imp && !alias
+    )
+    .map((component) => {
+      return createComponentConfig(component, [...ancestors, component])
+    })
+
   const modules = node.modules
     .filter(
-      ({ type, import: imp, alias }) =>
-        ['component', 'module'].includes(type) && !imp && !alias
+      ({ type, import: imp, alias }) => type === 'module' && !imp && !alias
     )
-    .map((module) => {
-      const { type, source } = module
-      if (type === 'module') {
-        return {
-          kind: 'module',
-          source,
-        }
+    .map(({ source }) => {
+      return {
+        kind: 'module',
+        source,
       }
-      return createComponentConfig(module, [...ancestors, module])
     })
 
   const imports = Object.fromEntries(
@@ -42,6 +45,7 @@ const createComponentConfig = (node, ancestors = [node]) => {
                 kindType: [],
               },
             ]
+          case 'component':
           case 'module':
             return [
               name,
@@ -76,13 +80,23 @@ const createComponentConfig = (node, ancestors = [node]) => {
 
   const instances = node.instances.map(
     ({
-      instanceExpression: { type, imports, exports, modulePath },
+      instanceExpression: { type, imports, exports, componentPath, modulePath },
       import: imp,
       path,
       // eslint-disable-next-line array-callback-return
     }) => {
       switch (type) {
-        case 'instantiate':
+        case 'instantiate component':
+          return {
+            kind: 'component',
+            componentPath: componentPath(ancestors),
+            imports: Object.fromEntries(
+              imports.map(({ name, kindReference: { kind, path } }) => {
+                return [name, { kind, path: path(ancestors) }]
+              })
+            ),
+          }
+        case 'instantiate module':
           return {
             kind: 'module',
             modulePath: modulePath(ancestors),
@@ -129,6 +143,7 @@ const createComponentConfig = (node, ancestors = [node]) => {
 
   return {
     kind: 'component',
+    components,
     modules,
     imports,
     instances,

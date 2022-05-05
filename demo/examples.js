@@ -19,13 +19,13 @@ export default () => [
           (export "store" (func $store))
           (export "load" (func $load))
         )
-        (instance $m0 (instantiate $M))
+        (instance $m0 (instantiate (module $M)))
         (func $store_m0 (alias $m0 "store"))
         (export "store instance 0" (func $store_m0))
         (func $load_m0 (alias $m0 "load"))
         (export "load instance 0" (func $load_m0))
 
-        (instance $m1 (instantiate $M))
+        (instance $m1 (instantiate (module $M)))
         (func $store_m1 (alias $m1 "store"))
         (export "store instance 1" (func $store_m1))
         (func $load_m1 (alias $m1 "load"))
@@ -73,11 +73,11 @@ export default () => [
           )
           (export "store" (func $store))
         )
-        (instance $loader (instantiate $Loader))
+        (instance $loader (instantiate (module $Loader)))
         (func $load (alias $loader "load"))
         (export "load from loader" (func $load))
 
-        (instance $storer (instantiate $Storer
+        (instance $storer (instantiate (module $Storer)
           (import "imp" (instance $loader))
         ))
         (func $store (alias $storer "store"))
@@ -134,7 +134,7 @@ export default () => [
           (func $g (alias $Outer $f))
           (export "inner-exp" (func $g))
         )
-        (instance $m (instantiate $Inner))
+        (instance $m (instantiate (component $Inner)))
         (func $h (alias $m "inner-exp"))
         (export "exp" (func $h))
       )
@@ -162,12 +162,14 @@ export default () => [
         (table $d (import "imptable"))
         (memory $e (import "impmemory"))
         (global $f (import "impglobal"))
+        (component $g (import "impcomponent"))
         (export "expmodule" (module $a))
         (export "expinstance" (instance $b))
         (export "expfunc" (func $c))
         (export "exptable" (table $d))
         (export "expmemory" (memory $e))
         (export "expglobal" (global $f))
+        (export "expcomponent" (component $g))
       )
     `,
     jsSource: dedent`
@@ -177,7 +179,8 @@ export default () => [
         impfunc: Symbol(),
         imptable: Symbol(),
         impmemory: Symbol(),
-        impglobal: Symbol()
+        impglobal: Symbol(),
+        impcomponent: Symbol()
       }
       const {exports: {
         expmodule,
@@ -185,7 +188,8 @@ export default () => [
         expfunc,
         exptable,
         expmemory,
-        expglobal
+        expglobal,
+        expcomponent
       }} = componentModelPolyfillRuntime(config, imports)
       console.log("impmodule === expmodule", imports.impmodule === expmodule)
       console.log("impinstance === expinstance", imports.impinstance === expinstance)
@@ -193,6 +197,7 @@ export default () => [
       console.log("imptable === exptable", imports.imptable === exptable)
       console.log("impmemory === expmemory", imports.impmemory === expmemory)
       console.log("impglobal === expglobal", imports.impglobal === expglobal)
+      console.log("impcomponent === expcomponent", imports.impcomponent === expcomponent)
     `,
     expectedJsConsole: dedent`
       impmodule === expmodule true
@@ -201,6 +206,7 @@ export default () => [
       imptable === exptable true
       impmemory === expmemory true
       impglobal === expglobal true
+      impcomponent === expcomponent true
     `,
   },
 ]

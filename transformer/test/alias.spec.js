@@ -32,6 +32,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: {
             imp: {
@@ -75,7 +76,7 @@ describe('component-transformer', () => {
                 (alias $M $f (func $g))
                 (export "inner-exp" (func $g))
               )
-              (export "exp" (module $N))
+              (export "exp" (component $N))
             )
           `,
         },
@@ -88,7 +89,7 @@ describe('component-transformer', () => {
                 (func $g (alias $M $f))
                 (export "inner-exp" (func $g))
               )
-              (export "exp" (module $N))
+              (export "exp" (component $N))
             )
           `,
         },
@@ -96,9 +97,10 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
-          modules: [
+          components: [
             {
               kind: 'component',
+              components: [],
               modules: [],
               imports: {},
               instances: [],
@@ -110,6 +112,7 @@ describe('component-transformer', () => {
               },
             },
           ],
+          modules: [],
           imports: {
             imp: {
               kind: 'func',
@@ -119,8 +122,8 @@ describe('component-transformer', () => {
           instances: [],
           exports: {
             exp: {
-              kind: 'module',
-              path: ['modules', 0],
+              kind: 'component',
+              path: ['components', 0],
             },
           },
         })

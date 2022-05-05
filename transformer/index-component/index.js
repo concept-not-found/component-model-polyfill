@@ -83,6 +83,22 @@ const indexAliases = (componentNode) => {
   delete componentNode.aliases
 }
 
+const indexComponents = (componentNode) => {
+  const concreteComponents = componentNode.components.filter(
+    ({ import: imp, alias }) => !imp && !alias
+  )
+  for (const [componentIdx, node] of concreteComponents.entries()) {
+    Object.defineProperty(node, 'path', {
+      value() {
+        return ['components', componentIdx]
+      },
+    })
+  }
+  for (const node of concreteComponents) {
+    component(node)
+  }
+}
+
 const indexModules = (componentNode) => {
   const concreteModules = componentNode.modules.filter(
     ({ import: imp, alias }) => !imp && !alias
@@ -95,14 +111,7 @@ const indexModules = (componentNode) => {
     })
   }
   for (const node of concreteModules) {
-    switch (node.type) {
-      case 'component':
-        component(node)
-        break
-      case 'module':
-        indexModule(node)
-        break
-    }
+    indexModule(node)
   }
 }
 
@@ -111,7 +120,8 @@ const indexDefinitions = (componentNode) => {
     ...Object.entries({ ...kindCollection, export: 'exports' }).map(
       ([kind, collection]) => [collection, ({ type }) => type === kind]
     ),
-    ['modules', ({ type }) => ['component', 'module'].includes(type)],
+    ['components', ({ type }) => type === 'component'],
+    ['modules', ({ type }) => type === 'module'],
     ['imports', ({ import: imp }) => imp],
     ['aliases', ({ alias }) => alias],
   ]
@@ -158,7 +168,29 @@ const indexInstances = (componentNode) => {
   }
   for (const { instanceExpression } of concreteInstances) {
     switch (instanceExpression.type) {
-      case 'instantiate':
+      case 'instantiate component':
+        Object.defineProperty(instanceExpression, 'componentPath', {
+          value(ancestors) {
+            const kind = 'component'
+            return resolvePath(
+              componentNode,
+              kind,
+              instanceExpression.componentIdx,
+              ancestors
+            )
+          },
+        })
+        for (const { kindReference } of instanceExpression.imports) {
+          Object.defineProperty(kindReference, 'path', {
+            value(ancestors) {
+              const { kind, kindIdx } = kindReference
+              const imported = resolve(componentNode, kind, kindIdx)
+              return imported.path(ancestors)
+            },
+          })
+        }
+        break
+      case 'instantiate module':
         Object.defineProperty(instanceExpression, 'modulePath', {
           value(ancestors) {
             const kind = 'module'
@@ -210,6 +242,7 @@ const indexImports = (componentNode) => {
 
 component = (node) => {
   indexDefinitions(node)
+  indexComponents(node)
   indexModules(node)
   indexInstances(node)
   indexSymbols(node)

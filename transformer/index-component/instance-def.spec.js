@@ -49,12 +49,12 @@ describe('index component', () => {
       })
     })
 
-    describe('instance instantiates module', () => {
+    describe('instance instantiates component', () => {
       test('implicit index', () => {
         const wat = `
           (component
-            (module)
-            (instance (instantiate 0))
+            (component)
+            (instance (instantiate (component 0)))
           )
         `
 
@@ -62,17 +62,16 @@ describe('index component', () => {
         const component = pipe(parser, parseComponent)(wat)
         indexComponent(component)
 
-        expect(component.instances[0].instanceExpression.modulePath()).toEqual([
-          'modules',
-          0,
-        ])
+        expect(
+          component.instances[0].instanceExpression.componentPath()
+        ).toEqual(['components', 0])
       })
 
       test('explicit index', () => {
         const wat = `
           (component
-            (module $M)
-            (instance (instantiate $M))
+            (component $M)
+            (instance (instantiate (component $M)))
           )
         `
 
@@ -80,22 +79,21 @@ describe('index component', () => {
         const component = pipe(parser, parseComponent)(wat)
         indexComponent(component)
 
-        expect(component.instances[0].instanceExpression.modulePath()).toEqual([
-          'modules',
-          0,
-        ])
+        expect(
+          component.instances[0].instanceExpression.componentPath()
+        ).toEqual(['components', 0])
       })
     })
 
-    describe('instance imports module', () => {
+    describe('instance imports component', () => {
       test('implicit index', () => {
         const wat = `
           (component
             (component
-              (import "self" (module))
+              (import "self" (component))
             )
-            (instance (instantiate 0
-              (import "self" (module 0))
+            (instance (instantiate (component 0)
+              (import "self" (component 0))
             ))
           )
         `
@@ -108,24 +106,24 @@ describe('index component', () => {
           {
             name: 'self',
             kindReference: {
-              kind: 'module',
+              kind: 'component',
               kindIdx: 0,
             },
           },
         ])
         expect(
           component.instances[0].instanceExpression.imports[0].kindReference.path()
-        ).toEqual(['modules', 0])
+        ).toEqual(['components', 0])
       })
 
       test('explicit index', () => {
         const wat = `
           (component
             (component $M
-              (import "self" (module))
+              (import "self" (component))
             )
-            (instance (instantiate $M
-              (import "self" (module $M))
+            (instance (instantiate (component $M)
+              (import "self" (component $M))
             ))
           )
         `
@@ -138,14 +136,14 @@ describe('index component', () => {
           {
             name: 'self',
             kindReference: {
-              kind: 'module',
+              kind: 'component',
               kindIdx: '$M',
             },
           },
         ])
         expect(
           component.instances[0].instanceExpression.imports[0].kindReference.path()
-        ).toEqual(['modules', 0])
+        ).toEqual(['components', 0])
       })
     })
 
@@ -157,7 +155,7 @@ describe('index component', () => {
               (import "f" (func))
             )
             (import "imp" (func))
-            (instance (instantiate 0
+            (instance (instantiate (component 0)
               (import "f" (func 0))
             ))
           )
@@ -179,7 +177,7 @@ describe('index component', () => {
               (import "f" (func))
             )
             (import "imp" (func $f))
-            (instance (instantiate 0
+            (instance (instantiate (component 0)
               (import "f" (func $f))
             ))
           )

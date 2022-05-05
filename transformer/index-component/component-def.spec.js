@@ -16,11 +16,11 @@ describe('index component', () => {
 
         const parser = Parser()
         const component = pipe(parser, parseComponent)(wat)
-        console.dir(component)
         indexComponent(component)
 
-        expect(component.modules[0]).toEqual({
+        expect(component.components[0]).toEqual({
           type: 'component',
+          components: [],
           modules: [],
           instances: [],
           funcs: [],
@@ -30,6 +30,7 @@ describe('index component', () => {
           imports: [],
           exports: [],
           symbolIndex: {
+            components: {},
             modules: {},
             instances: {},
             funcs: {},
@@ -51,10 +52,11 @@ describe('index component', () => {
         const component = pipe(parser, parseComponent)(wat)
         indexComponent(component)
 
-        expect(component.symbolIndex.modules.$M).toBe(0)
-        expect(component.modules[0]).toEqual({
+        expect(component.symbolIndex.components.$M).toBe(0)
+        expect(component.components[0]).toEqual({
           type: 'component',
           name: '$M',
+          components: [],
           modules: [],
           instances: [],
           funcs: [],
@@ -64,6 +66,7 @@ describe('index component', () => {
           imports: [],
           exports: [],
           symbolIndex: {
+            components: {},
             modules: {},
             instances: {},
             funcs: {},
@@ -135,7 +138,7 @@ describe('index component', () => {
       })
     })
 
-    describe('import component', () => {
+    describe('import module', () => {
       test('implicit index', () => {
         const wat = `
           (component

@@ -16,6 +16,7 @@ describe('index component', () => {
 
     expect(component).toEqual({
       type: 'component',
+      components: [],
       modules: [],
       instances: [],
       funcs: [],
@@ -25,6 +26,7 @@ describe('index component', () => {
       imports: [],
       exports: [],
       symbolIndex: {
+        components: {},
         modules: {},
         instances: {},
         funcs: {},

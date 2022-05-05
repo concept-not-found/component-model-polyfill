@@ -28,6 +28,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: {
             imp: { kind: 'func', kindType: [] },
@@ -67,6 +68,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: { imp: { kind: 'instance', exports: {} } },
           instances: [
@@ -110,6 +112,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: {
             imp: { kind: 'module', exports: {} },
@@ -155,6 +158,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: {
             imp: {
@@ -196,7 +200,7 @@ describe('component-transformer', () => {
               (import "imp" (module (;0;)
                 (export "f" (func))
               ))
-              (instance (;0;) (instantiate (;module;) 0))
+              (instance (;0;) (instantiate (module 0)))
               (alias (;instance;) 0 "f" (func (;0;)))
               (export "exp" (func 0))
             )
@@ -209,7 +213,7 @@ describe('component-transformer', () => {
               (module (;0;) (import "imp")
                 (export "f" (func))
               )
-              (instance (;0;) (instantiate (;module;) 0))
+              (instance (;0;) (instantiate (module 0)))
               (func (;0;) (alias (;instance;) 0 "f"))
               (export "exp" (func 0))
             )
@@ -219,6 +223,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: {
             imp: {
@@ -279,6 +284,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: {
             imp: {
@@ -321,7 +327,7 @@ describe('component-transformer', () => {
               (instance (;0;)
                 (export "f" (func 0))
               )
-              (instance (;1;) (instantiate (;module;) 0
+              (instance (;1;) (instantiate (module 0)
                 (import "mimp" (instance 0))
               ))
               (alias (;instance;) 1 "mexp" (func (;1;)))
@@ -347,7 +353,7 @@ describe('component-transformer', () => {
               (instance (;0;)
                 (export "f" (func 0))
               )
-              (instance (;1;) (instantiate (;module;) 0
+              (instance (;1;) (instantiate (module 0)
                 (import "mimp" (instance 0))
               ))
               (func (;1;) (alias (;instance;) 1 "mexp"))
@@ -365,6 +371,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [
             {
               kind: 'module',
@@ -436,6 +443,7 @@ describe('component-transformer', () => {
         const component = transformer(wat)
         expect(component).toEqual({
           kind: 'component',
+          components: [],
           modules: [],
           imports: {
             A: { kind: 'func', kindType: [] },

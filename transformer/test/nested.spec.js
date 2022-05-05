@@ -11,15 +11,17 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
-        modules: [
+        components: [
           {
             kind: 'component',
+            components: [],
             modules: [],
             imports: {},
             instances: [],
             exports: {},
           },
         ],
+        modules: [],
         imports: {},
         instances: [],
         exports: {},
@@ -37,30 +39,33 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
-        modules: [
+        components: [
           {
             kind: 'component',
-            modules: [
+            components: [
               {
                 kind: 'component',
+                components: [],
                 modules: [],
                 imports: {},
                 instances: [],
                 exports: {},
               },
             ],
+            modules: [],
             imports: {},
             instances: [],
             exports: {},
           },
         ],
+        modules: [],
         imports: {},
         instances: [],
         exports: {},
       })
     })
 
-    test('re-export func via inner module', () => {
+    test('re-export func via inner component', () => {
       const wat = `
         (component (;0;)
           (import "imp" (func (;0;)))
@@ -68,7 +73,7 @@ describe('component-transformer', () => {
             (alias (;outer;) 1 (;func;) 0 (func (;0;)))
             (export "inner-exp" (func 0))
           )
-          (instance (;0;) (instantiate (;module;) 0))
+          (instance (;0;) (instantiate (component 0)))
           (alias (;instance;) 0 "inner-exp" (func (;1;)))
           (export "exp" (func 1))
         )
@@ -76,9 +81,10 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
-        modules: [
+        components: [
           {
             kind: 'component',
+            components: [],
             modules: [],
             imports: {},
             instances: [],
@@ -90,6 +96,7 @@ describe('component-transformer', () => {
             },
           },
         ],
+        modules: [],
         imports: {
           imp: {
             kind: 'func',
@@ -98,8 +105,8 @@ describe('component-transformer', () => {
         },
         instances: [
           {
-            kind: 'module',
-            modulePath: ['modules', 0],
+            kind: 'component',
+            componentPath: ['components', 0],
             imports: {},
           },
         ],

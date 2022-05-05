@@ -11,7 +11,7 @@ describe('component-transformer', () => {
             (func (;0;))
             (export "f" (func 0))
           )
-          (instance (;0;) (instantiate (;module;) 0))
+          (instance (;0;) (instantiate (module 0)))
           (alias (;instance;) 0 "f" (func (;0;)))
           (export "exp" (func 0))
         )
@@ -19,6 +19,7 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
+        components: [],
         modules: [
           {
             kind: 'module',
@@ -57,6 +58,7 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
+        components: [],
         modules: [],
         imports: {},
         instances: [
@@ -84,6 +86,7 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
+        components: [],
         modules: [
           {
             kind: 'module',
@@ -107,13 +110,14 @@ describe('component-transformer', () => {
       const wat = dedent`
         (component (;0;)
           (module (;0;))
-          (instance (;0;) (instantiate (;module;) 0))
+          (instance (;0;) (instantiate (module 0)))
           (export "exp" (instance 0))
         )
       `
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
+        components: [],
         modules: [
           {
             kind: 'module',

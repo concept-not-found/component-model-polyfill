@@ -21,6 +21,7 @@ const kind = oneOf(
   value('memory'),
   value('table'),
   value('global'),
+  value('component'),
   value('module'),
   value('instance')
 )
@@ -137,6 +138,25 @@ const instanceTypeInlineImport = when(
   }
 )
 
+const componentTypeInlineImport = when(
+  sexp(
+    value('component'),
+    maybe(name),
+    inlineImport,
+    maybe(some(importType)),
+    maybe(some(exportType))
+  ),
+  ([, name, imp, imports, exports]) => {
+    return {
+      type: 'component',
+      name,
+      import: imp,
+      imports: imports ?? [],
+      exports: exports ?? [],
+    }
+  }
+)
+
 const moduleTypeInlineImport = when(
   sexp(
     value('module'),
@@ -159,6 +179,7 @@ const moduleTypeInlineImport = when(
 const inlineImportForm = oneOf(
   coreKindTypeInlineImport,
   instanceTypeInlineImport,
+  componentTypeInlineImport,
   moduleTypeInlineImport
 )
 const importDefinition = oneOf(importFirstForm, inlineImportForm)
@@ -192,11 +213,30 @@ const exportDefinition = when(
   }
 )
 
-const instanceInstantiate = when(
-  sexp(value('instantiate'), variable, maybe(some(instantiateImport))),
-  ([, moduleIdx, imports]) => {
+const instanceInstantiateComponent = when(
+  sexp(
+    value('instantiate'),
+    sexp(value('component'), variable),
+    maybe(some(instantiateImport))
+  ),
+  ([, [, componentIdx], imports]) => {
     return {
-      type: 'instantiate',
+      type: 'instantiate component',
+      componentIdx: parseIndex(componentIdx),
+      imports: imports ?? [],
+    }
+  }
+)
+
+const instanceInstantiateModule = when(
+  sexp(
+    value('instantiate'),
+    sexp(value('module'), variable),
+    maybe(some(instantiateImport))
+  ),
+  ([, [, moduleIdx], imports]) => {
+    return {
+      type: 'instantiate module',
       moduleIdx: parseIndex(moduleIdx),
       imports: imports ?? [],
     }
@@ -220,7 +260,11 @@ const instanceTupling = when(maybe(some(instanceExport)), (exports) => {
   }
 })
 
-const instanceExpression = oneOf(instanceInstantiate, instanceTupling)
+const instanceExpression = oneOf(
+  instanceInstantiateComponent,
+  instanceInstantiateModule,
+  instanceTupling
+)
 const instanceDefinition = when(
   sexp(value('instance'), maybe(name), instanceExpression),
   ([, name, instanceExpression]) => {

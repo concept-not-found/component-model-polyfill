@@ -10,6 +10,7 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
+        components: [],
         modules: [],
         imports: {},
         instances: [],
@@ -26,6 +27,7 @@ describe('component-transformer', () => {
       const component = transformer(wat)
       expect(component).toEqual({
         kind: 'component',
+        components: [],
         modules: [
           {
             kind: 'module',

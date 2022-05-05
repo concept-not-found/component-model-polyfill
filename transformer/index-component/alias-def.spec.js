@@ -70,7 +70,7 @@ describe('index component', () => {
         indexComponent(component)
 
         const ancestors = [component, component.modules[1]]
-        expect(component.modules[1].modules[0].path(ancestors)).toEqual([
+        expect(component.components[0].modules[0].path(ancestors)).toEqual([
           '..',
           'modules',
           0,
@@ -92,7 +92,7 @@ describe('index component', () => {
         indexComponent(component)
 
         const ancestors = [component, component.modules[1]]
-        expect(component.modules[1].modules[0].path(ancestors)).toEqual([
+        expect(component.components[0].modules[0].path(ancestors)).toEqual([
           '..',
           'modules',
           0,

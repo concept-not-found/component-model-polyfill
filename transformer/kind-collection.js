@@ -6,6 +6,7 @@ export const coreKindCollection = {
 }
 
 export default {
+  component: 'components',
   instance: 'instances',
   module: 'modules',
   ...coreKindCollection,

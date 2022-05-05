@@ -4,9 +4,10 @@ describe('component-module-polyfill-runtime', () => {
   test('component refers to parent', () => {
     const config = {
       kind: 'component',
-      modules: [
+      components: [
         {
           kind: 'component',
+          components: [],
           modules: [],
           imports: {},
           instances: [],
@@ -18,6 +19,7 @@ describe('component-module-polyfill-runtime', () => {
           },
         },
       ],
+      modules: [],
       imports: {
         imp: {
           kind: 'func',
@@ -26,8 +28,8 @@ describe('component-module-polyfill-runtime', () => {
       },
       instances: [
         {
-          kind: 'module',
-          modulePath: ['modules', 0],
+          kind: 'component',
+          componentPath: ['components', 0],
         },
       ],
       exports: {
