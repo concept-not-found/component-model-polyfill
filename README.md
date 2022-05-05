@@ -1,15 +1,18 @@
-# Module linking polyfill
+# Component model polyfill
 
-An **incomplete** 🚧 work in progress 🚧 polyfill for [WebAssembly](https://webassembly.org/) [Module linking proposal](https://github.com/WebAssembly/module-linking).
+An **incomplete** 🚧 work in progress 🚧 polyfill for [WebAssembly](https://webassembly.org/) [Component model proposal](https://github.com/WebAssembly/component-model).
 
-### <a href="https://concept-not-found.github.io/module-linking-polyfill">Live demo</a>
+### <a href="https://concept-not-found.github.io/component-model-polyfill">Live demo</a>
 
 ### 💣 Not production ready 💣
 
 Critical issues need to be resolved before the first release:
 
-- implement [type definitions](https://github.com/WebAssembly/module-linking/blob/main/design/proposals/module-linking/Explainer.md#type-definitions)
-- implement [alias syntactic sugar](https://github.com/WebAssembly/module-linking/blob/main/design/proposals/module-linking/Explainer.md#alias-definitions)
+- implement [alias syntactic sugar](https://github.com/WebAssembly/component-model/blob/main/design/mvp/Explainer.md#alias-definitions)
+- implement [type definitions](https://github.com/WebAssembly/component-model/blob/main/design/mvp/Explainer.md#type-definitions)
+- implement [function definitions](https://github.com/WebAssembly/component-model/blob/main/design/mvp/Explainer.md#function-definitions)
+- implement [start definitions](https://github.com/WebAssembly/component-model/blob/main/design/mvp/Explainer.md#start-definitions)
+- implement [js api to coerce values](https://github.com/WebAssembly/component-model/blob/main/design/mvp/Explainer.md#js-api)
 - implement type checking
 - implement error handling
 - add test scenarios
@@ -20,4 +23,4 @@ Critical issues need to be resolved before the first release:
 
 ### Project goals
 
-The intention of this project learn and understand how Module linking works. We value correctness and clear error messages over performance.
+The intention of this project learn and understand how Componenet model works. We value correctness and clear error messages over performance.

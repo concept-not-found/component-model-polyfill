@@ -1,21 +1,21 @@
 {
-  "name": "@concept-not-found/module-linking-polyfill-demo",
+  "name": "@concept-not-found/component-model-polyfill-demo",
   "version": "0.5.0",
   "private": true,
-  "description": "Demo for https://github.com/WebAssembly/module-linking polyfill",
+  "description": "Demo for https://github.com/WebAssembly/component-model polyfill",
   "keywords": [
     "webassembly",
-    "module linking",
+    "component model",
     "polyfill"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/concept-not-found/module-linking-polyfill.git"
+    "url": "https://github.com/concept-not-found/component-model-polyfill.git"
   },
   "bugs": {
-    "url": "https://github.com/concept-not-found/module-linking-polyfill/issues"
+    "url": "https://github.com/concept-not-found/component-model-polyfill/issues"
   },
-  "homepage": "https://github.com/concept-not-found/module-linking-polyfill",
+  "homepage": "https://github.com/concept-not-found/component-model-polyfill",
   "engines": {
     "node": ">=16.9.0"
   },
@@ -29,8 +29,8 @@
   "author": "Ronald Chen <pyrogx1133@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@concept-not-found/module-linking-polyfill-runtime": "workspace:../runtime",
-    "@concept-not-found/module-linking-polyfill-transformer": "workspace:../transformer",
+    "@concept-not-found/component-model-polyfill-runtime": "workspace:../runtime",
+    "@concept-not-found/component-model-polyfill-transformer": "workspace:../transformer",
     "dedent": "0.7.0",
     "jest": "28.0.3",
     "vite": "2.9.8",

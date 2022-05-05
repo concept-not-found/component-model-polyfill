@@ -1,3 +1,3 @@
-# Module linking polyfill runtime
+# Component-model polyfill runtime
 
-Runtime component for [@concept-not-found/module-linking-polyfill](https://github.com/concept-not-found/module-linking-polyfill).
+Runtime component for [@concept-not-found/component-model-polyfill](https://github.com/concept-not-found/component-model-polyfill).

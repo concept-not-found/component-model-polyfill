@@ -1,3 +1,3 @@
-# Module linking polyfill transformer
+# Component model polyfill transformer
 
-Transformer component for [@concept-not-found/module-linking-polyfill](https://github.com/concept-not-found/module-linking-polyfill).
+Transformer component for [@concept-not-found/component-model-polyfill](https://github.com/concept-not-found/component-model-polyfill).

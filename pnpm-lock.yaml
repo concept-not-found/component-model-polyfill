@@ -24,15 +24,15 @@ importers:
 
   demo:
     specifiers:
-      '@concept-not-found/module-linking-polyfill-runtime': workspace:../runtime
-      '@concept-not-found/module-linking-polyfill-transformer': workspace:../transformer
+      '@concept-not-found/component-model-polyfill-runtime': workspace:../runtime
+      '@concept-not-found/component-model-polyfill-transformer': workspace:../transformer
       dedent: 0.7.0
       jest: 28.0.3
       vite: 2.9.8
       wabt: 1.0.25
     devDependencies:
-      '@concept-not-found/module-linking-polyfill-runtime': link:../runtime
-      '@concept-not-found/module-linking-polyfill-transformer': link:../transformer
+      '@concept-not-found/component-model-polyfill-runtime': link:../runtime
+      '@concept-not-found/component-model-polyfill-transformer': link:../transformer
       dedent: 0.7.0
       jest: 28.0.3
       vite: 2.9.8

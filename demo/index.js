@@ -1,6 +1,6 @@
 import Wabt from 'wabt'
-import transformer from '@concept-not-found/module-linking-polyfill-transformer'
-import runtime from '@concept-not-found/module-linking-polyfill-runtime'
+import transformer from '@concept-not-found/component-model-polyfill-transformer'
+import runtime from '@concept-not-found/component-model-polyfill-runtime'
 
 export default async () => {
   const wabt = await Wabt()
