@@ -16,7 +16,7 @@ function path(parts, object) {
   }
 }
 
-const createAdapterModuleInstance = (config, imports = {}, parent) => {
+const createComponentInstance = (config, imports = {}, parent) => {
   const live = {
     '..': parent,
     modules: config.modules,
@@ -60,7 +60,7 @@ const createAdapterModuleInstance = (config, imports = {}, parent) => {
           }
         }
         live.instances.push(
-          createAdapterModuleInstance(
+          createComponentInstance(
             path(instance.modulePath, live),
             imports,
             live
@@ -80,4 +80,4 @@ const createAdapterModuleInstance = (config, imports = {}, parent) => {
   return { exports }
 }
 
-export default createAdapterModuleInstance
+export default createComponentInstance

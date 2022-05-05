@@ -273,32 +273,26 @@ const inlineAliasForm = when(
 )
 const aliasDefinition = oneOf(aliasFirstForm, inlineAliasForm)
 
-const adapterModuleReference = reference()
+const componentReference = reference()
 const definition = oneOf(
   importDefinition,
   instanceDefinition,
   aliasDefinition,
   exportDefinition,
   module,
-  adapterModuleReference,
+  componentReference,
   sexp(rest)
 )
-const adapterModule = when(
-  sexp(
-    value('adapter'),
-    value('module'),
-    maybe(name),
-    maybe(some(definition)),
-    rest
-  ),
-  ([, , name, definitions]) => {
+const component = when(
+  sexp(value('component'), maybe(name), maybe(some(definition)), rest),
+  ([, name, definitions]) => {
     return {
-      type: 'adapter module',
+      type: 'component',
       name,
       definitions: definitions ?? [],
     }
   }
 )
-adapterModuleReference.matcher = adapterModule
+componentReference.matcher = component
 
-export default (wat) => match(wat)(adapterModule)
+export default (wat) => match(wat)(component)

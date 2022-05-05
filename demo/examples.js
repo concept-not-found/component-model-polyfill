@@ -4,7 +4,7 @@ export default () => [
   {
     name: 'two instances of a module with independent memory',
     watSource: dedent`
-      (adapter module
+      (component
         (module $M
           (memory 1)
           (func $store (param $value i32)
@@ -33,7 +33,7 @@ export default () => [
       )
     `,
     jsSource: dedent`
-      const {exports} = moduleLinkingPolyfillRuntime(config)
+      const {exports} = componentModelPolyfillRuntime(config)
       console.log("load instance 0:", exports["load instance 0"]())
       console.log("load instance 1:", exports["load instance 1"]())
 
@@ -54,7 +54,7 @@ export default () => [
   {
     name: 'module shares memory with another',
     watSource: dedent`
-      (adapter module
+      (component
         (module $Loader
           (memory $memory 1)
           (export "mem" (memory $memory))
@@ -85,7 +85,7 @@ export default () => [
       )
     `,
     jsSource: dedent`
-      const {exports} = moduleLinkingPolyfillRuntime(config)
+      const {exports} = componentModelPolyfillRuntime(config)
       console.log("load from loader:", exports["load from loader"]())
 
       exports["store into storer"](42)
@@ -102,7 +102,7 @@ export default () => [
   {
     name: 're-export instance func',
     watSource: dedent`
-      (adapter module
+      (component
         (instance $i (import "imp")
           (export "f" (func (result i32)))
         )
@@ -118,7 +118,7 @@ export default () => [
           }
         }
       }
-      const {exports: {exp}} = moduleLinkingPolyfillRuntime(config, imports)
+      const {exports: {exp}} = componentModelPolyfillRuntime(config, imports)
       console.log("exp() ===", exp())
     `,
     expectedJsConsole: dedent`
@@ -126,11 +126,11 @@ export default () => [
     `,
   },
   {
-    name: 'adapter module is closed over import',
+    name: 'component is closed over import',
     watSource: dedent`
-      (adapter module $Outer
+      (component $Outer
         (func $f (import "imp") (result i32))
-        (adapter module $Inner
+        (component $Inner
           (func $g (alias $Outer $f))
           (export "inner-exp" (func $g))
         )
@@ -145,7 +145,7 @@ export default () => [
           return 42
         }
       }
-      const {exports: {exp}} = moduleLinkingPolyfillRuntime(config, imports)
+      const {exports: {exp}} = componentModelPolyfillRuntime(config, imports)
       console.log("exp() ===", exp())
     `,
     expectedJsConsole: dedent`
@@ -155,7 +155,7 @@ export default () => [
   {
     name: 're-export all kinds',
     watSource: dedent`
-      (adapter module (;0;)
+      (component (;0;)
         (module $a (import "impmodule"))
         (instance $b (import "impinstance"))
         (func $c (import "impfunc"))
@@ -186,7 +186,7 @@ export default () => [
         exptable,
         expmemory,
         expglobal
-      }} = moduleLinkingPolyfillRuntime(config, imports)
+      }} = componentModelPolyfillRuntime(config, imports)
       console.log("impmodule === expmodule", imports.impmodule === expmodule)
       console.log("impinstance === expinstance", imports.impinstance === expinstance)
       console.log("impfunc === expfunc", imports.impfunc === expfunc)

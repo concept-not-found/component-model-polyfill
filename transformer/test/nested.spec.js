@@ -1,19 +1,19 @@
 import transformer from '../index.js'
 
-describe('adapter-module-transformer', () => {
+describe('component-transformer', () => {
   describe('nested', () => {
-    test('nested empty adapter module', () => {
+    test('nested empty component', () => {
       const wat = `
-        (adapter module (;0;)
-          (adapter module (;0;))
+        (component (;0;)
+          (component (;0;))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
-            kind: 'adapter module',
+            kind: 'component',
             modules: [],
             imports: {},
             instances: [],
@@ -26,23 +26,23 @@ describe('adapter-module-transformer', () => {
       })
     })
 
-    test('nested nested empty adapter module', () => {
+    test('nested nested empty component', () => {
       const wat = `
-        (adapter module (;0;)
-          (adapter module (;0;)
-            (adapter module (;0;))
+        (component (;0;)
+          (component (;0;)
+            (component (;0;))
           )
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
-            kind: 'adapter module',
+            kind: 'component',
             modules: [
               {
-                kind: 'adapter module',
+                kind: 'component',
                 modules: [],
                 imports: {},
                 instances: [],
@@ -62,9 +62,9 @@ describe('adapter-module-transformer', () => {
 
     test('re-export func via inner module', () => {
       const wat = `
-        (adapter module (;0;)
+        (component (;0;)
           (import "imp" (func (;0;)))
-          (adapter module (;0;)
+          (component (;0;)
             (alias (;outer;) 1 (;func;) 0 (func (;0;)))
             (export "inner-exp" (func 0))
           )
@@ -73,12 +73,12 @@ describe('adapter-module-transformer', () => {
           (export "exp" (func 1))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
-            kind: 'adapter module',
+            kind: 'component',
             modules: [],
             imports: {},
             instances: [],

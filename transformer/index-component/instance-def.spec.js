@@ -1,24 +1,24 @@
 import pipe from '../pipe.js'
 import Parser from '../parser/index.js'
 
-import indexAdapterModule from './index.js'
-import parseModule from './grammar.js'
+import indexComponent from './index.js'
+import parseComponent from './grammar.js'
 
-describe('index adapter module', () => {
+describe('index component', () => {
   describe('instance definition', () => {
     describe('empty instance', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (instance)
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.instances[0]).toEqual({
+        expect(component.instances[0]).toEqual({
           type: 'instance',
           instanceExpression: {
             type: 'tupling',
@@ -29,16 +29,16 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (instance $i)
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.instances[0]).toEqual({
+        expect(component.instances[0]).toEqual({
           type: 'instance',
           name: '$i',
           instanceExpression: {
@@ -52,44 +52,46 @@ describe('index adapter module', () => {
     describe('instance instantiates module', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module)
             (instance (instantiate 0))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(
-          adapterModule.instances[0].instanceExpression.modulePath()
-        ).toEqual(['modules', 0])
+        expect(component.instances[0].instanceExpression.modulePath()).toEqual([
+          'modules',
+          0,
+        ])
       })
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module $M)
             (instance (instantiate $M))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(
-          adapterModule.instances[0].instanceExpression.modulePath()
-        ).toEqual(['modules', 0])
+        expect(component.instances[0].instanceExpression.modulePath()).toEqual([
+          'modules',
+          0,
+        ])
       })
     })
 
     describe('instance imports module', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
-            (adapter module
+          (component
+            (component
               (import "self" (module))
             )
             (instance (instantiate 0
@@ -99,10 +101,10 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.instances[0].instanceExpression.imports).toEqual([
+        expect(component.instances[0].instanceExpression.imports).toEqual([
           {
             name: 'self',
             kindReference: {
@@ -112,14 +114,14 @@ describe('index adapter module', () => {
           },
         ])
         expect(
-          adapterModule.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.imports[0].kindReference.path()
         ).toEqual(['modules', 0])
       })
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
-            (adapter module $M
+          (component
+            (component $M
               (import "self" (module))
             )
             (instance (instantiate $M
@@ -129,10 +131,10 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.instances[0].instanceExpression.imports).toEqual([
+        expect(component.instances[0].instanceExpression.imports).toEqual([
           {
             name: 'self',
             kindReference: {
@@ -142,7 +144,7 @@ describe('index adapter module', () => {
           },
         ])
         expect(
-          adapterModule.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.imports[0].kindReference.path()
         ).toEqual(['modules', 0])
       })
     })
@@ -150,8 +152,8 @@ describe('index adapter module', () => {
     describe('instance imports func', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
-            (adapter module
+          (component
+            (component
               (import "f" (func))
             )
             (import "imp" (func))
@@ -162,18 +164,18 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
         expect(
-          adapterModule.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.imports[0].kindReference.path()
         ).toEqual(['imports', 'imp'])
       })
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
-            (adapter module
+          (component
+            (component
               (import "f" (func))
             )
             (import "imp" (func $f))
@@ -184,11 +186,11 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
         expect(
-          adapterModule.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.imports[0].kindReference.path()
         ).toEqual(['imports', 'imp'])
       })
     })
@@ -196,7 +198,7 @@ describe('index adapter module', () => {
     describe('instance exports module', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module)
             (instance
               (export "ex" (module 0))
@@ -205,12 +207,10 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(
-          adapterModule.instances[0].instanceExpression.exports[0]
-        ).toEqual({
+        expect(component.instances[0].instanceExpression.exports[0]).toEqual({
           name: 'ex',
           kindReference: {
             kind: 'module',
@@ -218,13 +218,13 @@ describe('index adapter module', () => {
           },
         })
         expect(
-          adapterModule.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].kindReference.path()
         ).toEqual(['modules', 0])
       })
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module $M)
             (instance
               (export "ex" (module $M))
@@ -233,12 +233,10 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(
-          adapterModule.instances[0].instanceExpression.exports[0]
-        ).toEqual({
+        expect(component.instances[0].instanceExpression.exports[0]).toEqual({
           name: 'ex',
           kindReference: {
             kind: 'module',
@@ -246,7 +244,7 @@ describe('index adapter module', () => {
           },
         })
         expect(
-          adapterModule.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].kindReference.path()
         ).toEqual(['modules', 0])
       })
     })
@@ -254,7 +252,7 @@ describe('index adapter module', () => {
     describe('instance exports func', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "imp" (func))
             (instance
               (export "f" (func 0))
@@ -263,17 +261,17 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
         expect(
-          adapterModule.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].kindReference.path()
         ).toEqual(['imports', 'imp'])
       })
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "imp" (func $f))
             (instance
               (export "f" (func $f))
@@ -282,11 +280,11 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
         expect(
-          adapterModule.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].kindReference.path()
         ).toEqual(['imports', 'imp'])
       })
     })
@@ -294,7 +292,7 @@ describe('index adapter module', () => {
     describe('import instance', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "imp" (instance
               (export "f" (func))
             ))
@@ -302,10 +300,10 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.instances[0]).toEqual({
+        expect(component.instances[0]).toEqual({
           type: 'instance',
           instanceExpression: {
             type: 'tupling',
@@ -326,7 +324,7 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "imp" (instance $i
               (export "f" (func))
             ))
@@ -334,11 +332,11 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.symbolIndex.instances.$i).toBe(0)
-        expect(adapterModule.instances[0]).toEqual({
+        expect(component.symbolIndex.instances.$i).toBe(0)
+        expect(component.instances[0]).toEqual({
           type: 'instance',
           name: '$i',
           instanceExpression: {
@@ -362,7 +360,7 @@ describe('index adapter module', () => {
     describe('alias instance', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "imp" (instance
               (export "f" (func))
             ))
@@ -371,10 +369,10 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.instances[1]).toEqual({
+        expect(component.instances[1]).toEqual({
           type: 'instance',
           alias: {
             type: 'outer',
@@ -386,7 +384,7 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "imp" (instance
               (export "f" (func))
             ))
@@ -395,11 +393,11 @@ describe('index adapter module', () => {
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.symbolIndex.instances.$i).toBe(1)
-        expect(adapterModule.instances[1]).toEqual({
+        expect(component.symbolIndex.instances.$i).toBe(1)
+        expect(component.instances[1]).toEqual({
           type: 'instance',
           name: '$i',
           alias: {

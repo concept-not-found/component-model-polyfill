@@ -1,25 +1,25 @@
 import pipe from '../pipe.js'
 import Parser from '../parser/index.js'
 
-import indexAdapterModule from './index.js'
-import parseModule from './grammar.js'
+import indexComponent from './index.js'
+import parseComponent from './grammar.js'
 
-describe('index adapter module', () => {
+describe('index component', () => {
   describe('export defintion', () => {
     describe('module', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module)
             (export "ex" (module 0))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.exports).toEqual([
+        expect(component.exports).toEqual([
           {
             type: 'export',
             name: 'ex',
@@ -29,7 +29,7 @@ describe('index adapter module', () => {
             },
           },
         ])
-        expect(adapterModule.exports[0].kindReference.path()).toEqual([
+        expect(component.exports[0].kindReference.path()).toEqual([
           'modules',
           0,
         ])
@@ -37,17 +37,17 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module $M)
             (export "ex" (module $M))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.exports).toEqual([
+        expect(component.exports).toEqual([
           {
             type: 'export',
             name: 'ex',
@@ -57,7 +57,7 @@ describe('index adapter module', () => {
             },
           },
         ])
-        expect(adapterModule.exports[0].kindReference.path()).toEqual([
+        expect(component.exports[0].kindReference.path()).toEqual([
           'modules',
           0,
         ])

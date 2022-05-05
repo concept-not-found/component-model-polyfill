@@ -29,7 +29,7 @@ export default async () => {
 
       const executable = new Function(
         'console',
-        'moduleLinkingPolyfillRuntime',
+        'componentModelPolyfillRuntime',
         'config',
         js
       )

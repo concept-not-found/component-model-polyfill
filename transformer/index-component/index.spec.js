@@ -1,21 +1,21 @@
 import pipe from '../pipe.js'
 import Parser from '../parser/index.js'
 
-import indexAdapterModule from './index.js'
-import parseModule from './grammar.js'
+import indexComponent from './index.js'
+import parseComponent from './grammar.js'
 
-describe('index adapter module', () => {
+describe('index component', () => {
   test('empty', () => {
     const wat = `
-      (adapter module)
+      (component)
     `
 
     const parser = Parser()
-    const adapterModule = pipe(parser, parseModule)(wat)
-    indexAdapterModule(adapterModule)
+    const component = pipe(parser, parseComponent)(wat)
+    indexComponent(component)
 
-    expect(adapterModule).toEqual({
-      type: 'adapter module',
+    expect(component).toEqual({
+      type: 'component',
       modules: [],
       instances: [],
       funcs: [],

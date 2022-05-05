@@ -345,7 +345,7 @@ describe('parser', () => {
 
   test('capture an sexp by tag', () => {
     const wat = `
-      (adapter module (;0;)
+      (component (;0;)
         (module (;1;))
       )
     `
@@ -354,7 +354,7 @@ describe('parser', () => {
     })
     const result = parser(wat)
     const {
-      value: [, , { source }],
+      value: [, { source }],
     } = result
 
     expect(source).toBe('(module (;1;))')

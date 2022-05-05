@@ -1,22 +1,20 @@
 import watParser from './parser/index.js'
 import pipe from './pipe.js'
 
-import indexAdapterModule from './index-adapter-module/index.js'
-import parseAdapterModule from './index-adapter-module/grammar.js'
+import indexComponent from './index-component/index.js'
+import parseComponent from './index-component/grammar.js'
 
-const createAdapterModuleConfig = (node, ancestors = [node]) => {
-  if (node.type !== 'adapter module') {
+const createComponentConfig = (node, ancestors = [node]) => {
+  if (node.type !== 'component') {
     throw new Error(
-      `expected top level sexp to be adapter module but got ${JSON.stringify(
-        node
-      )}`
+      `expected top level sexp to be component but got ${JSON.stringify(node)}`
     )
   }
 
   const modules = node.modules
     .filter(
       ({ type, import: imp, alias }) =>
-        ['adapter module', 'module'].includes(type) && !imp && !alias
+        ['component', 'module'].includes(type) && !imp && !alias
     )
     .map((module) => {
       const { type, source } = module
@@ -26,7 +24,7 @@ const createAdapterModuleConfig = (node, ancestors = [node]) => {
           source,
         }
       }
-      return createAdapterModuleConfig(module, [...ancestors, module])
+      return createComponentConfig(module, [...ancestors, module])
     })
 
   const imports = Object.fromEntries(
@@ -130,7 +128,7 @@ const createAdapterModuleConfig = (node, ancestors = [node]) => {
   )
 
   return {
-    kind: 'adapter module',
+    kind: 'component',
     modules,
     imports,
     instances,
@@ -140,10 +138,10 @@ const createAdapterModuleConfig = (node, ancestors = [node]) => {
 
 export default pipe(
   watParser({ sourceTags: ['module'] }),
-  parseAdapterModule,
+  parseComponent,
   (node) => {
-    indexAdapterModule(node)
+    indexComponent(node)
     return node
   },
-  createAdapterModuleConfig
+  createComponentConfig
 )

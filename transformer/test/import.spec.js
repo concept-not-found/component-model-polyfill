@@ -2,14 +2,14 @@ import dedent from '../dedent.js'
 import onedent from '../onedent.js'
 import transformer from '../index.js'
 
-describe('adapter-module-transformer', () => {
+describe('component-transformer', () => {
   describe('import', () => {
     describe('re-export func', () => {
       test.each([
         {
           form: 'import first',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (import "imp" (func (;0;)))
               (export "exp" (func 0))
             )
@@ -18,16 +18,16 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (func (;0;) (import "imp"))
               (export "exp" (func 0))
             )
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: {
             imp: { kind: 'func', kindType: [] },
@@ -48,7 +48,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'import first',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (import "imp" (instance (;0;)))
               (export "exp" (instance 0))
             )
@@ -57,16 +57,16 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (instance (;0;) (import "imp"))
               (export "exp" (instance 0))
             )
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: { imp: { kind: 'instance', exports: {} } },
           instances: [
@@ -91,7 +91,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'import first',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (import "imp" (module (;0;)))
               (export "exp" (module 0))
             )
@@ -100,16 +100,16 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (module (;0;) (import "imp"))
               (export "exp" (module 0))
             )
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: {
             imp: { kind: 'module', exports: {} },
@@ -130,7 +130,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'import first',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (import "imp" (instance (;0;)
                 (export "f" (func (result i32)))
               ))
@@ -142,7 +142,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (instance (;0;) (import "imp")
                 (export "f" (func (result i32)))
               )
@@ -152,9 +152,9 @@ describe('adapter-module-transformer', () => {
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: {
             imp: {
@@ -192,7 +192,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'import first',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (import "imp" (module (;0;)
                 (export "f" (func))
               ))
@@ -205,7 +205,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (module (;0;) (import "imp")
                 (export "f" (func))
               )
@@ -216,9 +216,9 @@ describe('adapter-module-transformer', () => {
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: {
             imp: {
@@ -252,7 +252,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'import first',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (import "imp" (func (;0;)))
               (instance (;0;)
                 (export "f" (func 0))
@@ -265,7 +265,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (func (;0;) (import "imp"))
               (instance (;0;)
                 (export "f" (func 0))
@@ -276,9 +276,9 @@ describe('adapter-module-transformer', () => {
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: {
             imp: {
@@ -312,7 +312,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'import first',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (module (;0;)
                 (import "mimp" "f" (func (;0;)))
                 (export "mexp" (func 0))
@@ -338,7 +338,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module (;0;)
+            (component (;0;)
               (module (;0;)
                 (func (;0;) (import "mimp" "f"))
                 (export "mexp" (func 0))
@@ -362,9 +362,9 @@ describe('adapter-module-transformer', () => {
           `,
         },
       ])('$form', ({ wat, expectedSource }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [
             {
               kind: 'module',
@@ -413,7 +413,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'import first',
           wat: dedent`
-            (adapter module
+            (component
               (import "A" (func))
               (import "B" (func))
               (export "X" (func 1))
@@ -424,7 +424,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline import',
           wat: dedent`
-            (adapter module
+            (component
               (func (import "A"))
               (func (import "B"))
               (export "X" (func 1))
@@ -433,9 +433,9 @@ describe('adapter-module-transformer', () => {
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: {
             A: { kind: 'func', kindType: [] },

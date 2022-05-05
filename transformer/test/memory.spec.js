@@ -2,11 +2,11 @@ import dedent from '../dedent.js'
 import onedent from '../onedent.js'
 import transformer from '../index.js'
 
-describe('adapter-module-transformer', () => {
+describe('component-transformer', () => {
   describe('import', () => {
     test('two instances of same module with independent memory', () => {
       const wat = dedent`
-        (adapter module (;0;)
+        (component (;0;)
           (module (;0;)
             (memory 1)
             (func (;0;) (param (;0;) i32)
@@ -24,9 +24,9 @@ describe('adapter-module-transformer', () => {
           (export "store instance 1" (func 1))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
             kind: 'module',
@@ -71,7 +71,7 @@ describe('adapter-module-transformer', () => {
 
     test('module shares memory with another', () => {
       const wat = dedent`
-        (adapter module (;0;)
+        (component (;0;)
           (module (;0;)
             (memory (;0;) 1)
             (export "mem" (memory 0))
@@ -100,9 +100,9 @@ describe('adapter-module-transformer', () => {
           (export "store into module 1" (func 1))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
             kind: 'module',

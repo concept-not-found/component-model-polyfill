@@ -2,11 +2,11 @@ import dedent from '../dedent.js'
 import onedent from '../onedent.js'
 import transformer from '../index.js'
 
-describe('adapter-module-transformer', () => {
+describe('component-transformer', () => {
   describe('export', () => {
     test('export module func', () => {
       const wat = dedent`
-        (adapter module (;0;)
+        (component (;0;)
           (module (;0;)
             (func (;0;))
             (export "f" (func 0))
@@ -16,9 +16,9 @@ describe('adapter-module-transformer', () => {
           (export "exp" (func 0))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
             kind: 'module',
@@ -49,14 +49,14 @@ describe('adapter-module-transformer', () => {
 
     test('export instance', () => {
       const wat = `
-        (adapter module (;0;)
+        (component (;0;)
           (instance (;0;))
           (export "exp" (instance 0))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [],
         imports: {},
         instances: [
@@ -76,14 +76,14 @@ describe('adapter-module-transformer', () => {
 
     test('export module', () => {
       const wat = dedent`
-        (adapter module (;0;)
+        (component (;0;)
           (module (;0;))
           (export "exp" (module 0))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
             kind: 'module',
@@ -105,15 +105,15 @@ describe('adapter-module-transformer', () => {
 
     test('export module instance', () => {
       const wat = dedent`
-        (adapter module (;0;)
+        (component (;0;)
           (module (;0;))
           (instance (;0;) (instantiate (;module;) 0))
           (export "exp" (instance 0))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
             kind: 'module',

@@ -20,9 +20,9 @@ describe('demo', () => {
     {
       name: 'chained outer alias',
       watSource: dedent`
-        (adapter module $M
-          (adapter module $MM
-            (adapter module $MMM
+        (component $M
+          (component $MM
+            (component $MMM
               (func $fff (alias $MM $ff))
               (export "inner-inner-exp" (func $fff))
             )
@@ -43,7 +43,7 @@ describe('demo', () => {
             return 42
           }
         }
-        const {exports: {exp}} = moduleLinkingPolyfillRuntime(config, imports)
+        const {exports: {exp}} = componentModelPolyfillRuntime(config, imports)
         console.log("exp() ===", exp())
       `,
       expectedJsConsole: dedent`

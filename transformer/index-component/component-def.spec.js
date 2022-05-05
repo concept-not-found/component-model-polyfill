@@ -1,25 +1,26 @@
 import pipe from '../pipe.js'
 import Parser from '../parser/index.js'
 
-import indexAdapterModule from './index.js'
-import parseModule from './grammar.js'
+import indexComponent from './index.js'
+import parseComponent from './grammar.js'
 
-describe('index adapter module', () => {
-  describe('module definition', () => {
-    describe('adapter module', () => {
+describe('index component', () => {
+  describe('component definition', () => {
+    describe('component', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
-            (adapter module)
+          (component
+            (component)
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        console.dir(component)
+        indexComponent(component)
 
-        expect(adapterModule.modules[0]).toEqual({
-          type: 'adapter module',
+        expect(component.modules[0]).toEqual({
+          type: 'component',
           modules: [],
           instances: [],
           funcs: [],
@@ -41,18 +42,18 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
-            (adapter module $M)
+          (component
+            (component $M)
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.symbolIndex.modules.$M).toBe(0)
-        expect(adapterModule.modules[0]).toEqual({
-          type: 'adapter module',
+        expect(component.symbolIndex.modules.$M).toBe(0)
+        expect(component.modules[0]).toEqual({
+          type: 'component',
           name: '$M',
           modules: [],
           instances: [],
@@ -77,16 +78,16 @@ describe('index adapter module', () => {
     describe('module', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module)
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.modules[0]).toEqual({
+        expect(component.modules[0]).toEqual({
           type: 'module',
           imports: [],
           exports: [],
@@ -105,17 +106,17 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (module $M)
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.symbolIndex.modules.$M).toBe(0)
-        expect(adapterModule.modules[0]).toEqual({
+        expect(component.symbolIndex.modules.$M).toBe(0)
+        expect(component.modules[0]).toEqual({
           type: 'module',
           name: '$M',
           imports: [],
@@ -134,19 +135,19 @@ describe('index adapter module', () => {
       })
     })
 
-    describe('import adapter module', () => {
+    describe('import component', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "mod" (module))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.modules[0]).toEqual({
+        expect(component.modules[0]).toEqual({
           type: 'module',
           imports: [],
           exports: [],
@@ -154,7 +155,7 @@ describe('index adapter module', () => {
             name: 'mod',
           },
         })
-        expect(adapterModule.imports[0]).toEqual({
+        expect(component.imports[0]).toEqual({
           type: 'module',
           imports: [],
           exports: [],
@@ -166,17 +167,17 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (import "mod" (module $M))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.symbolIndex.modules.$M).toBe(0)
-        expect(adapterModule.modules[0]).toEqual({
+        expect(component.symbolIndex.modules.$M).toBe(0)
+        expect(component.modules[0]).toEqual({
           type: 'module',
           name: '$M',
           imports: [],
@@ -185,7 +186,7 @@ describe('index adapter module', () => {
             name: 'mod',
           },
         })
-        expect(adapterModule.imports[0]).toEqual({
+        expect(component.imports[0]).toEqual({
           type: 'module',
           name: '$M',
           imports: [],
@@ -200,16 +201,16 @@ describe('index adapter module', () => {
     describe('alias module', () => {
       test('implicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (alias 1 0 (module))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.modules[0]).toEqual({
+        expect(component.modules[0]).toEqual({
           type: 'module',
           alias: {
             type: 'outer',
@@ -221,17 +222,17 @@ describe('index adapter module', () => {
 
       test('explicit index', () => {
         const wat = `
-          (adapter module
+          (component
             (alias 1 0 (module $M))
           )
         `
 
         const parser = Parser()
-        const adapterModule = pipe(parser, parseModule)(wat)
-        indexAdapterModule(adapterModule)
+        const component = pipe(parser, parseComponent)(wat)
+        indexComponent(component)
 
-        expect(adapterModule.symbolIndex.modules.$M).toBe(0)
-        expect(adapterModule.modules[0]).toEqual({
+        expect(component.symbolIndex.modules.$M).toBe(0)
+        expect(component.modules[0]).toEqual({
           type: 'module',
           name: '$M',
           alias: {

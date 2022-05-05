@@ -1,13 +1,13 @@
 import transformer from '../index.js'
 
-describe('adapter-module-transformer', () => {
+describe('component-transformer', () => {
   describe('alias', () => {
     describe('instance export', () => {
       test.each([
         {
           form: 'alias first',
           wat: `
-            (adapter module
+            (component
               (import "imp" (instance $i
                 (export "inner-exp" (func))
               ))
@@ -19,7 +19,7 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline alias',
           wat: `
-            (adapter module
+            (component
               (instance $i (import "imp")
                 (export "inner-exp" (func))
               )
@@ -29,9 +29,9 @@ describe('adapter-module-transformer', () => {
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [],
           imports: {
             imp: {
@@ -69,9 +69,9 @@ describe('adapter-module-transformer', () => {
         {
           form: 'alias first',
           wat: `
-            (adapter module $M
+            (component $M
               (import "imp" (func $f))
-              (adapter module $N
+              (component $N
                 (alias $M $f (func $g))
                 (export "inner-exp" (func $g))
               )
@@ -82,9 +82,9 @@ describe('adapter-module-transformer', () => {
         {
           form: 'inline alias',
           wat: `
-            (adapter module $M
+            (component $M
               (func $f (import "imp"))
-              (adapter module $N
+              (component $N
                 (func $g (alias $M $f))
                 (export "inner-exp" (func $g))
               )
@@ -93,12 +93,12 @@ describe('adapter-module-transformer', () => {
           `,
         },
       ])('$form', ({ wat }) => {
-        const adapterModule = transformer(wat)
-        expect(adapterModule).toEqual({
-          kind: 'adapter module',
+        const component = transformer(wat)
+        expect(component).toEqual({
+          kind: 'component',
           modules: [
             {
-              kind: 'adapter module',
+              kind: 'component',
               modules: [],
               imports: {},
               instances: [],

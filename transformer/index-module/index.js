@@ -1,10 +1,10 @@
 import { coreKindCollection } from '../kind-collection.js'
 
-function resolveIndex(adapterModuleNode, kind, kindIdx) {
+function resolveIndex(moduleNode, kind, kindIdx) {
   const collection = coreKindCollection[kind]
   return typeof kindIdx === 'number'
     ? kindIdx
-    : adapterModuleNode.symbolIndex[collection][kindIdx]
+    : moduleNode.symbolIndex[collection][kindIdx]
 }
 
 function directPath(moduleNode, kind, kindIdx) {
@@ -25,7 +25,7 @@ const indexExports = (moduleNode) => {
   }
 }
 
-const indexDefinitions = (adapterModuleNode) => {
+const indexDefinitions = (moduleNode) => {
   const matchers = [
     ...Object.entries({ ...coreKindCollection, export: 'exports' }).map(
       ([kind, collection]) => [collection, ({ type }) => type === kind]
@@ -33,10 +33,9 @@ const indexDefinitions = (adapterModuleNode) => {
     ['imports', ({ import: imp }) => imp],
   ]
   for (const [collection, matcher] of matchers) {
-    adapterModuleNode[collection] =
-      adapterModuleNode.definitions.filter(matcher)
+    moduleNode[collection] = moduleNode.definitions.filter(matcher)
   }
-  delete adapterModuleNode.definitions
+  delete moduleNode.definitions
 }
 
 const indexSymbols = (moduleNode) => {
@@ -52,8 +51,8 @@ const indexSymbols = (moduleNode) => {
   }
 }
 
-export default (node) => {
-  indexDefinitions(node)
-  indexSymbols(node)
-  indexExports(node)
+export default (moduleNode) => {
+  indexDefinitions(moduleNode)
+  indexSymbols(moduleNode)
+  indexExports(moduleNode)
 }

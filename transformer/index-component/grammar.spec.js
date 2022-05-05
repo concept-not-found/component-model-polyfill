@@ -1,19 +1,19 @@
 import Parser from '../parser/index.js'
 
-import parseAdapterModule from './grammar.js'
+import parseComponent from './grammar.js'
 
-describe('adapter module', () => {
+describe('component', () => {
   describe('parser', () => {
     test('empty module', () => {
       const wat = `
-        (adapter module
+        (component
         )
       `
       const parser = Parser()
       const input = parser(wat)
-      const module = parseAdapterModule(input)
+      const module = parseComponent(input)
       expect(module).toEqual({
-        type: 'adapter module',
+        type: 'component',
         definitions: [],
       })
     })

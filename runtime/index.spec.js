@@ -1,12 +1,12 @@
 import runtime from './index.js'
 
-describe('module-linking-polyfill-runtime', () => {
-  test('adapter module refers to parent', () => {
+describe('component-module-polyfill-runtime', () => {
+  test('component refers to parent', () => {
     const config = {
-      kind: 'adapter module',
+      kind: 'component',
       modules: [
         {
-          kind: 'adapter module',
+          kind: 'component',
           modules: [],
           imports: {},
           instances: [],

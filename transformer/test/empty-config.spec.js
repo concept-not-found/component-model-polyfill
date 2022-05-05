@@ -1,15 +1,15 @@
 import onedent from '../onedent.js'
 import transformer from '../index.js'
 
-describe('adapter-module-transformer', () => {
+describe('component-transformer', () => {
   describe('empty config', () => {
-    test('empty adapter module', () => {
+    test('empty component', () => {
       const wat = `
-        (adapter module (;0;))
+        (component (;0;))
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [],
         imports: {},
         instances: [],
@@ -19,13 +19,13 @@ describe('adapter-module-transformer', () => {
 
     test('nested empty module', () => {
       const wat = `
-        (adapter module (;0;)
+        (component (;0;)
           (module (;0;))
         )
       `
-      const adapterModule = transformer(wat)
-      expect(adapterModule).toEqual({
-        kind: 'adapter module',
+      const component = transformer(wat)
+      expect(component).toEqual({
+        kind: 'component',
         modules: [
           {
             kind: 'module',
