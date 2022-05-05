@@ -17,26 +17,23 @@
   },
   "homepage": "https://github.com/concept-not-found/module-linking-polyfill",
   "engines": {
-    "node": ">=16.0.0"
+    "node": ">=16.9.0"
   },
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "vite",
     "test": "NODE_OPTIONS='--experimental-vm-modules --no-warnings' jest",
-    "build": "ejs --output-file=index.html ./index.html.ejs"
+    "build": "vite build"
   },
   "author": "Ronald Chen <pyrogx1133@gmail.com>",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@concept-not-found/module-linking-polyfill-runtime": "^0.5.0",
-    "@concept-not-found/module-linking-polyfill-transformer": "^0.5.0",
+    "@concept-not-found/module-linking-polyfill-runtime": "workspace:../runtime",
+    "@concept-not-found/module-linking-polyfill-transformer": "workspace:../transformer",
     "dedent": "0.7.0",
-    "ejs": "3.1.6",
-    "fastify": "3.27.0",
-    "fastify-static": "4.5.0",
-    "jest": "27.4.5",
-    "point-of-view": "5.0.0",
+    "jest": "28.0.3",
+    "vite": "2.9.8",
     "wabt": "1.0.25"
   },
   "jest": {

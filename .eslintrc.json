@@ -64,6 +64,7 @@
         "allowModules": ["@jest/globals"]
       }
     ],
+    "node/no-unpublished-import": "off",
 
     "unicorn/prevent-abbreviations": [
       "error",

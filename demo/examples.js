@@ -1,4 +1,6 @@
-export default (dedent) => [
+import dedent from 'dedent'
+
+export default () => [
   {
     name: 'two instances of a module with independent memory',
     watSource: dedent`

@@ -1,4 +1,9 @@
-export default (wabt, transformer, runtime) => {
+import Wabt from 'wabt'
+import transformer from '@concept-not-found/module-linking-polyfill-transformer'
+import runtime from '@concept-not-found/module-linking-polyfill-runtime'
+
+export default async () => {
+  const wabt = await Wabt()
   return {
     transformWat(wat) {
       const config = transformer(wat)
