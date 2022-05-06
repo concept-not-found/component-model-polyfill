@@ -2,8 +2,6 @@
 
 An **incomplete** 🚧 work in progress 🚧 polyfill for [WebAssembly](https://webassembly.org/) [Component model proposal](https://github.com/WebAssembly/component-model).
 
-### <a href="https://concept-not-found.github.io/component-model-polyfill">Live demo</a>
-
 ### 💣 Not production ready 💣
 
 Critical issues need to be resolved before the first release:
