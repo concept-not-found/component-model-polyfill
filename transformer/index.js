@@ -80,7 +80,13 @@ const createComponentConfig = (node, ancestors = [node]) => {
 
   const instances = node.instances.map(
     ({
-      instanceExpression: { type, imports, exports, componentPath, modulePath },
+      instanceExpression: {
+        type,
+        arguments: args,
+        exports,
+        componentPath,
+        modulePath,
+      },
       import: imp,
       path,
       // eslint-disable-next-line array-callback-return
@@ -91,7 +97,7 @@ const createComponentConfig = (node, ancestors = [node]) => {
             kind: 'component',
             componentPath: componentPath(ancestors),
             imports: Object.fromEntries(
-              imports.map(({ name, kindReference: { kind, path } }) => {
+              args.map(({ name, reference: { kind, path } }) => {
                 return [name, { kind, path: path(ancestors) }]
               })
             ),
@@ -101,7 +107,7 @@ const createComponentConfig = (node, ancestors = [node]) => {
             kind: 'module',
             modulePath: modulePath(ancestors),
             imports: Object.fromEntries(
-              imports.map(({ name, kindReference: { kind, path } }) => {
+              args.map(({ name, reference: { kind, path } }) => {
                 return [name, { kind, path: path(ancestors) }]
               })
             ),
@@ -120,7 +126,7 @@ const createComponentConfig = (node, ancestors = [node]) => {
             : {
                 kind: 'instance',
                 exports: Object.fromEntries(
-                  exports.map(({ name, kindReference: { kind, path } }) => {
+                  exports.map(({ name, reference: { kind, path } }) => {
                     return [name, { kind, path: path(ancestors) }]
                   })
                 ),

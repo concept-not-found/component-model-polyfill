@@ -93,7 +93,7 @@ describe('component-transformer', () => {
           )
           (instance (;0;) (instantiate (module 0)))
           (instance (;1;) (instantiate (module 1)
-            (import "imp" (instance 0))
+            (with "imp" (instance 0))
           ))
           (alias (;instance;) 0 "load" (func (;0;)))
           (alias (;instance;) 1 "store" (func (;1;)))

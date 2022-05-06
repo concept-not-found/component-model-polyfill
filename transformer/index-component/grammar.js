@@ -46,19 +46,35 @@ const exportType = when(
 
 const instanceType = when(
   sexp(value('instance'), maybe(name), maybe(some(exportType))),
-  ([, name, exports]) => {
+  ([, name, exports = []]) => {
     return {
       type: 'instance',
       name,
       instanceExpression: {
         type: 'tupling',
-        exports: exports ?? [],
+        exports,
       },
     }
   }
 )
 
 const importType = sexp(value('import'), anyString, kindTypeReference)
+const componentType = when(
+  sexp(
+    value('component'),
+    maybe(name),
+    maybe(some(importType)),
+    maybe(some(exportType))
+  ),
+  ([, name, imports = [], exports = []]) => {
+    return {
+      type: 'component',
+      name,
+      imports,
+      exports,
+    }
+  }
+)
 const moduleType = when(
   sexp(
     value('module'),
@@ -66,12 +82,12 @@ const moduleType = when(
     maybe(some(importType)),
     maybe(some(exportType))
   ),
-  ([, name, imports, exports]) => {
+  ([, name, imports = [], exports = []]) => {
     return {
       type: 'module',
       name,
-      imports: imports ?? [],
-      exports: exports ?? [],
+      imports,
+      exports,
     }
   }
 )
@@ -90,7 +106,7 @@ const coreKindType = when(sexp(...coreKindName, rest), ([type, name]) => {
   }
 })
 
-const kindType = oneOf(coreKindType, instanceType, moduleType)
+const kindType = oneOf(coreKindType, instanceType, componentType, moduleType)
 kindTypeReference.matcher = kindType
 
 const importName = [value('import'), anyString]
@@ -125,14 +141,14 @@ const coreKindTypeInlineImport = when(
 
 const instanceTypeInlineImport = when(
   sexp(value('instance'), maybe(name), inlineImport, maybe(some(exportType))),
-  ([, name, imp, exports]) => {
+  ([, name, imp, exports = []]) => {
     return {
       type: 'instance',
       name,
       import: imp,
       instanceExpression: {
         type: 'tupling',
-        exports: exports ?? [],
+        exports,
       },
     }
   }
@@ -146,13 +162,13 @@ const componentTypeInlineImport = when(
     maybe(some(importType)),
     maybe(some(exportType))
   ),
-  ([, name, imp, imports, exports]) => {
+  ([, name, imp, imports = [], exports = []]) => {
     return {
       type: 'component',
       name,
       import: imp,
-      imports: imports ?? [],
-      exports: exports ?? [],
+      imports,
+      exports,
     }
   }
 )
@@ -165,13 +181,13 @@ const moduleTypeInlineImport = when(
     maybe(some(importType)),
     maybe(some(exportType))
   ),
-  ([, name, imp, imports, exports]) => {
+  ([, name, imp, imports = [], exports = []]) => {
     return {
       type: 'module',
       name,
       import: imp,
-      imports: imports ?? [],
-      exports: exports ?? [],
+      imports,
+      exports,
     }
   }
 )
@@ -191,16 +207,6 @@ const kindReference = when(sexp(kind, variable), ([kind, kindIdx]) => {
   }
 })
 
-const instantiateImport = when(
-  sexp(...importName, kindReference),
-  ([, name, kindReference]) => {
-    return {
-      name,
-      kindReference,
-    }
-  }
-)
-
 const exportName = [value('export'), anyString]
 const exportDefinition = when(
   sexp(...exportName, kindReference),
@@ -213,17 +219,96 @@ const exportDefinition = when(
   }
 )
 
+const withName = [value('with'), anyString]
+
+const componentArgumentReference = reference()
+const instanceExport = when(
+  sexp(...exportName, componentArgumentReference),
+  ([, name, argument]) => {
+    return {
+      name,
+      ...argument,
+    }
+  }
+)
+
+const kindReferenceArgument = when(kindReference, (reference) => {
+  return {
+    type: 'reference',
+    reference,
+  }
+})
+const instanceExports = maybe(some(instanceExport))
+const inlineInstanceArgument = when(
+  sexp(value('instance'), instanceExports),
+  ([, exports = []]) => {
+    return {
+      type: 'inline instance',
+      exports,
+    }
+  }
+)
+
+componentArgumentReference.matcher = oneOf(
+  kindReferenceArgument,
+  inlineInstanceArgument
+)
+
+const withComponentArgument = when(
+  sexp(...withName, componentArgumentReference),
+  ([, name, argument]) => {
+    return {
+      name,
+      ...argument,
+    }
+  }
+)
+
 const instanceInstantiateComponent = when(
   sexp(
     value('instantiate'),
     sexp(value('component'), variable),
-    maybe(some(instantiateImport))
+    maybe(some(withComponentArgument))
   ),
-  ([, [, componentIdx], imports]) => {
+  ([, [, componentIdx], args = []]) => {
     return {
       type: 'instantiate component',
       componentIdx: parseIndex(componentIdx),
-      imports: imports ?? [],
+      arguments: args,
+    }
+  }
+)
+
+const instanceReference = when(
+  sexp(value('instance'), variable),
+  ([, kindIdx]) => {
+    return {
+      type: 'reference',
+      reference: {
+        kind: 'instance',
+        kindIdx: parseIndex(kindIdx),
+      },
+    }
+  }
+)
+const inlineCoreInstanceArgument = when(
+  sexp(value('instance'), coreKindType),
+  ([, exports = []]) => {
+    return {
+      type: 'inline instance',
+      exports,
+    }
+  }
+)
+
+const moduleArgument = oneOf(instanceReference, inlineCoreInstanceArgument)
+
+const withModuleArgument = when(
+  sexp(...withName, moduleArgument),
+  ([, name, argument]) => {
+    return {
+      name,
+      ...argument,
     }
   }
 )
@@ -232,31 +317,21 @@ const instanceInstantiateModule = when(
   sexp(
     value('instantiate'),
     sexp(value('module'), variable),
-    maybe(some(instantiateImport))
+    maybe(some(withModuleArgument))
   ),
-  ([, [, moduleIdx], imports]) => {
+  ([, [, moduleIdx], args = []]) => {
     return {
       type: 'instantiate module',
       moduleIdx: parseIndex(moduleIdx),
-      imports: imports ?? [],
+      arguments: args,
     }
   }
 )
 
-const instanceExport = when(
-  sexp(...exportName, kindReference),
-  ([, name, kindReference]) => {
-    return {
-      name,
-      kindReference,
-    }
-  }
-)
-
-const instanceTupling = when(maybe(some(instanceExport)), (exports) => {
+const instanceTupling = when(instanceExports, (exports = []) => {
   return {
     type: 'tupling',
-    exports: exports ?? [],
+    exports,
   }
 })
 
@@ -329,11 +404,11 @@ const definition = oneOf(
 )
 const component = when(
   sexp(value('component'), maybe(name), maybe(some(definition)), rest),
-  ([, name, definitions]) => {
+  ([, name, definitions = []]) => {
     return {
       type: 'component',
       name,
-      definitions: definitions ?? [],
+      definitions,
     }
   }
 )

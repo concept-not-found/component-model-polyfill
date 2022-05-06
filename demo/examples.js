@@ -78,7 +78,7 @@ export default () => [
         (export "load from loader" (func $load))
 
         (instance $storer (instantiate (module $Storer)
-          (import "imp" (instance $loader))
+          (with "imp" (instance $loader))
         ))
         (func $store (alias $storer "store"))
         (export "store into storer" (func $store))

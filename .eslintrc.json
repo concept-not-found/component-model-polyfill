@@ -70,7 +70,14 @@
     "unicorn/prevent-abbreviations": [
       "error",
       {
-        "ignore": ["^e2e\\.spec", "Idx$", "Func$", "Def$", "def\\.spec$"]
+        "ignore": [
+          "^e2e\\.spec",
+          "Idx$",
+          "Func$",
+          "Def$",
+          "def\\.spec$",
+          "args"
+        ]
       }
     ],
     "unicorn/no-array-callback-reference": "off",

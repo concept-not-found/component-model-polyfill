@@ -79,10 +79,10 @@ export const blockCommentMatcher = when(
     maybe(some(blockCommentChildrenMatcher)),
     blockCommentEnd
   ),
-  ([, value]) => {
+  ([, value = []]) => {
     return {
       type: 'block comment',
-      value: value ?? [],
+      value,
     }
   }
 )

@@ -180,10 +180,15 @@ const indexInstances = (componentNode) => {
             )
           },
         })
-        for (const { kindReference } of instanceExpression.imports) {
-          Object.defineProperty(kindReference, 'path', {
+        for (const { type, reference } of instanceExpression.arguments) {
+          if (type !== 'reference') {
+            throw new Error(
+              `instantiate module argument of type ${type} not implemented yet`
+            )
+          }
+          Object.defineProperty(reference, 'path', {
             value(ancestors) {
-              const { kind, kindIdx } = kindReference
+              const { kind, kindIdx } = reference
               const imported = resolve(componentNode, kind, kindIdx)
               return imported.path(ancestors)
             },
@@ -202,10 +207,15 @@ const indexInstances = (componentNode) => {
             )
           },
         })
-        for (const { kindReference } of instanceExpression.imports) {
-          Object.defineProperty(kindReference, 'path', {
+        for (const { type, reference } of instanceExpression.arguments) {
+          if (type !== 'reference') {
+            throw new Error(
+              `instantiate module argument of type ${type} not implemented yet`
+            )
+          }
+          Object.defineProperty(reference, 'path', {
             value(ancestors) {
-              const { kind, kindIdx } = kindReference
+              const { kind, kindIdx } = reference
               const imported = resolve(componentNode, kind, kindIdx)
               return imported.path(ancestors)
             },
@@ -213,10 +223,15 @@ const indexInstances = (componentNode) => {
         }
         break
       case 'tupling':
-        for (const { kindReference } of instanceExpression.exports) {
-          Object.defineProperty(kindReference, 'path', {
+        for (const { type, reference } of instanceExpression.exports) {
+          if (type !== 'reference') {
+            throw new Error(
+              `instantiate module argument of type ${type} not implemented yet`
+            )
+          }
+          Object.defineProperty(reference, 'path', {
             value(ancestors) {
-              const { kind, kindIdx } = kindReference
+              const { kind, kindIdx } = reference
               const exported = resolve(componentNode, kind, kindIdx)
               return exported.path(ancestors)
             },

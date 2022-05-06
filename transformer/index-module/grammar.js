@@ -71,7 +71,7 @@ const definition = oneOf(
 export const module = when(
   sexp(value('module'), maybe(name), maybe(some(definition))),
   (
-    [, name, definitions],
+    [, name, definitions = []],
     {
       result: {
         rest: {
@@ -83,7 +83,7 @@ export const module = when(
     return {
       type: 'module',
       name,
-      definitions: definitions ?? [],
+      definitions,
       source,
     }
   }

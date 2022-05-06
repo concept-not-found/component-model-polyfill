@@ -93,7 +93,7 @@ describe('index component', () => {
               (import "self" (component))
             )
             (instance (instantiate (component 0)
-              (import "self" (component 0))
+              (with "self" (component 0))
             ))
           )
         `
@@ -102,17 +102,18 @@ describe('index component', () => {
         const component = pipe(parser, parseComponent)(wat)
         indexComponent(component)
 
-        expect(component.instances[0].instanceExpression.imports).toEqual([
+        expect(component.instances[0].instanceExpression.arguments).toEqual([
           {
             name: 'self',
-            kindReference: {
+            type: 'reference',
+            reference: {
               kind: 'component',
               kindIdx: 0,
             },
           },
         ])
         expect(
-          component.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.arguments[0].reference.path()
         ).toEqual(['components', 0])
       })
 
@@ -123,7 +124,7 @@ describe('index component', () => {
               (import "self" (component))
             )
             (instance (instantiate (component $M)
-              (import "self" (component $M))
+              (with "self" (component $M))
             ))
           )
         `
@@ -132,17 +133,18 @@ describe('index component', () => {
         const component = pipe(parser, parseComponent)(wat)
         indexComponent(component)
 
-        expect(component.instances[0].instanceExpression.imports).toEqual([
+        expect(component.instances[0].instanceExpression.arguments).toEqual([
           {
             name: 'self',
-            kindReference: {
+            type: 'reference',
+            reference: {
               kind: 'component',
               kindIdx: '$M',
             },
           },
         ])
         expect(
-          component.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.arguments[0].reference.path()
         ).toEqual(['components', 0])
       })
     })
@@ -156,7 +158,7 @@ describe('index component', () => {
             )
             (import "imp" (func))
             (instance (instantiate (component 0)
-              (import "f" (func 0))
+              (with "f" (func 0))
             ))
           )
         `
@@ -166,7 +168,7 @@ describe('index component', () => {
         indexComponent(component)
 
         expect(
-          component.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.arguments[0].reference.path()
         ).toEqual(['imports', 'imp'])
       })
 
@@ -178,7 +180,7 @@ describe('index component', () => {
             )
             (import "imp" (func $f))
             (instance (instantiate (component 0)
-              (import "f" (func $f))
+              (with "f" (func $f))
             ))
           )
         `
@@ -188,7 +190,7 @@ describe('index component', () => {
         indexComponent(component)
 
         expect(
-          component.instances[0].instanceExpression.imports[0].kindReference.path()
+          component.instances[0].instanceExpression.arguments[0].reference.path()
         ).toEqual(['imports', 'imp'])
       })
     })
@@ -210,13 +212,14 @@ describe('index component', () => {
 
         expect(component.instances[0].instanceExpression.exports[0]).toEqual({
           name: 'ex',
-          kindReference: {
+          type: 'reference',
+          reference: {
             kind: 'module',
             kindIdx: 0,
           },
         })
         expect(
-          component.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].reference.path()
         ).toEqual(['modules', 0])
       })
 
@@ -236,13 +239,14 @@ describe('index component', () => {
 
         expect(component.instances[0].instanceExpression.exports[0]).toEqual({
           name: 'ex',
-          kindReference: {
+          type: 'reference',
+          reference: {
             kind: 'module',
             kindIdx: '$M',
           },
         })
         expect(
-          component.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].reference.path()
         ).toEqual(['modules', 0])
       })
     })
@@ -263,7 +267,7 @@ describe('index component', () => {
         indexComponent(component)
 
         expect(
-          component.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].reference.path()
         ).toEqual(['imports', 'imp'])
       })
 
@@ -282,7 +286,7 @@ describe('index component', () => {
         indexComponent(component)
 
         expect(
-          component.instances[0].instanceExpression.exports[0].kindReference.path()
+          component.instances[0].instanceExpression.exports[0].reference.path()
         ).toEqual(['imports', 'imp'])
       })
     })
