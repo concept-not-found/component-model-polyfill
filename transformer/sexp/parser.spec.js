@@ -19,7 +19,7 @@ describe('parser', () => {
       { wat: 'foo(;bar', deliminator: 'start of block comment' },
       { wat: 'foo;)bar', deliminator: 'end of block comment' },
       { wat: 'foo;;bar', deliminator: 'line comment' },
-    ])('matched “$wat” up to $deliminator deliminator', ({ wat }) => {
+    ])('matched “$wat” as “foo” due to $deliminator deliminator', ({ wat }) => {
       const matcher = valueMatcher
       const result = matcher(asInternalIterator(wat))
 
@@ -49,42 +49,36 @@ describe('parser', () => {
     )
   })
 
-  describe('stringMatcher', () => {
-    test('matched empty string', () => {
-      const wat = '""'
+  describe('stringMatcher matches anything between double quotes', () => {
+    test.each([
+      { wat: '""', value: '' },
+      { wat: '"foo"', value: 'foo' },
+    ])('matched “$wat” as “$value”', ({ wat, value }) => {
       const matcher = stringMatcher
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toMatchObject({
         type: 'string',
-        value: '',
+        value,
       })
     })
 
-    test('matched string', () => {
-      const wat = '"module"'
+    test('matched “"foo\\""” as “foo"” as double quotes can be escaped with “\\"”', () => {
+      const wat = '"foo\\""'
       const matcher = stringMatcher
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toMatchObject({
         type: 'string',
-        value: 'module',
+        value: 'foo\\"',
       })
     })
 
-    test('matched string with escape', () => {
-      const wat = '"\\"module\\""'
-      const matcher = stringMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toMatchObject({
-        type: 'string',
-        value: '\\"module\\"',
-      })
-    })
-
-    test('unmatched value', () => {
-      const wat = 'module'
+    test.each([
+      { wat: 'foo', reason: 'missing double quotes' },
+      { wat: '"foo', reason: 'missing end double quote' },
+      { wat: 'foo"', reason: 'missing start double quote' },
+    ])('unmatched “$wat” due to $reason', ({ wat }) => {
       const matcher = stringMatcher
       const result = matcher(asInternalIterator(wat))
 
