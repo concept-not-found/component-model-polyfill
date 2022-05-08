@@ -15,22 +15,27 @@ jobs:
         with:
           node-version: ${{ steps.nodenv.outputs.node-version }}
 
-      - name: restore node_modules
-        uses: actions/cache@v2
+      - uses: pnpm/action-setup@v2.2.1
+        id: pnpm-install
+        with:
+          version: 7.0.1
+          run_install: false
+
+      - name: get pnpm store directory
+        id: pnpm-cache
+        run: |
+          echo "::set-output name=pnpm_cache_dir::$(pnpm store path)"
+
+      - name: restore install cache
+        uses: actions/cache@v3
         id: cache
         with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: npm-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: npm-
+          path: ${{ steps.pnpm-cache.outputs.pnpm_cache_dir }}
+          key: pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: pnpm-
 
       - name: install dependencies
-        if: steps.cache.outputs.cache-hit != 'true'
-        run: npm ci --ignore-scripts
-
-      - name: install package dependencies
-        run: npx lerna bootstrap
+        run: pnpm install
 
       - name: run lint
-        run: npm run lint:ci
+        run: pnpm run lint:ci
