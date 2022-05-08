@@ -1,6 +1,7 @@
-import Parser from '../parser/index.js'
+import pipe from '../pipe.js'
+import { Parser as SexpParser } from '../sexp/index.js'
 
-import parseComponent from './grammar.js'
+import parse from './parser.js'
 
 describe('component', () => {
   describe('parser', () => {
@@ -9,9 +10,8 @@ describe('component', () => {
         (component
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const component = parseComponent(input)
+      const parseSexp = SexpParser()
+      const component = pipe(parseSexp, parse)(wat)
       expect(component).toEqual({
         type: 'component',
         definitions: [],
@@ -25,9 +25,8 @@ describe('component', () => {
           ))
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const component = parseComponent(input)
+      const parseSexp = SexpParser()
+      const component = pipe(parseSexp, parse)(wat)
       expect(component).toEqual({
         type: 'component',
         definitions: [

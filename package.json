@@ -24,11 +24,11 @@
   },
   "author": "Ronald Chen <pyrogx1133@gmail.com>",
   "license": "Apache-2.0",
-  "packageManager": "pnpm@7.0.0",
+  "packageManager": "pnpm@7.0.1",
   "type:": "module",
   "engines": {
-    "npm": "use-pnpm-instead",
-    "pnpm": "7.0.0",
+    "npm": "8.5.5",
+    "pnpm": "7.0.1",
     "node": ">=16.9.0"
   },
   "devDependencies": {

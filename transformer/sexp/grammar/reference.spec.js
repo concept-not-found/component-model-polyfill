@@ -1,5 +1,4 @@
-import { sexp, value } from './grammar.js'
-import { reference } from './index.js'
+import { sexp, value, reference } from './index.js'
 
 describe('matcher', () => {
   describe('reference', () => {

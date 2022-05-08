@@ -1,8 +1,8 @@
 import pipe from '../pipe.js'
-import Parser from '../parser/index.js'
+import { Parser as SexpParser } from '../sexp/index.js'
 
-import parseModule from './grammar.js'
-import indexModule from './index.js'
+import parse from './parser.js'
+import index from './indexer.js'
 
 describe('index module', () => {
   describe('empty func', () => {
@@ -13,9 +13,9 @@ describe('index module', () => {
         )
       `
 
-      const parser = Parser()
-      const module = pipe(parser, parseModule)(wat)
-      indexModule(module)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
+      index(module)
 
       expect(module.funcs[0]).toEqual({
         type: 'func',
@@ -28,9 +28,9 @@ describe('index module', () => {
         )
       `
 
-      const parser = Parser()
-      const module = pipe(parser, parseModule)(wat)
-      indexModule(module)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
+      index(module)
 
       expect(module.symbolIndex.funcs.$f).toBe(0)
       expect(module.funcs[0]).toEqual({
@@ -49,9 +49,9 @@ describe('index module', () => {
         )
       `
 
-      const parser = Parser()
-      const module = pipe(parser, parseModule)(wat)
-      indexModule(module)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
+      index(module)
 
       expect(module.exports).toEqual([
         {
@@ -74,9 +74,9 @@ describe('index module', () => {
         )
       `
 
-      const parser = Parser()
-      const module = pipe(parser, parseModule)(wat)
-      indexModule(module)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
+      index(module)
 
       expect(module.exports).toEqual([
         {
@@ -100,9 +100,9 @@ describe('index module', () => {
         )
       `
 
-      const parser = Parser()
-      const module = pipe(parser, parseModule)(wat)
-      indexModule(module)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
+      index(module)
 
       const expectedImportFunc = {
         type: 'func',
@@ -122,9 +122,9 @@ describe('index module', () => {
         )
       `
 
-      const parser = Parser()
-      const module = pipe(parser, parseModule)(wat)
-      indexModule(module)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
+      index(module)
 
       expect(module.symbolIndex.funcs.$f).toBe(0)
       const expectedImportFunc = {

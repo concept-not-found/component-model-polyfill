@@ -1,57 +1,17 @@
-import Parser from '../parser/index.js'
+import pipe from '../pipe.js'
+import { Parser as SexpParser } from '../sexp/index.js'
 
-import parseModule, { name, kind, kindDefinition } from './grammar.js'
+import parse from './parser.js'
 
 describe('core module', () => {
-  describe('grammar', () => {
-    describe('name', () => {
-      test('func', () => {
-        const matcher = name
-        const result = matcher({ type: 'value', value: '$f' })
-        expect(result).toMatchObject({
-          matched: true,
-          value: '$f',
-        })
-      })
-    })
-    describe('kind', () => {
-      test('func', () => {
-        const matcher = kind
-        const result = matcher({ type: 'value', value: 'func' })
-        expect(result).toMatchObject({
-          matched: true,
-          value: 'func',
-        })
-      })
-    })
-    describe('kindDefinition', () => {
-      test('named func', () => {
-        const matcher = kindDefinition
-        const result = matcher({
-          type: 'sexp',
-          value: [
-            { type: 'value', value: 'func' },
-            { type: 'value', value: '$f' },
-          ],
-        })
-        expect(result).toMatchObject({
-          matched: true,
-          value: {
-            type: 'func',
-            name: '$f',
-          },
-        })
-      })
-    })
-
+  describe('parser', () => {
     test('empty module', () => {
       const wat = `
         (module
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const module = parseModule(input)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
       expect(module).toEqual({
         type: 'module',
         definitions: [],
@@ -64,9 +24,8 @@ describe('core module', () => {
           (func)
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const module = parseModule(input)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
       expect(module).toEqual({
         type: 'module',
         definitions: [
@@ -84,9 +43,8 @@ describe('core module', () => {
           (func)
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const module = parseModule(input)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
       expect(module).toEqual({
         type: 'module',
         definitions: [
@@ -106,9 +64,8 @@ describe('core module', () => {
           (func $f)
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const module = parseModule(input)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
       expect(module).toEqual({
         type: 'module',
         definitions: [
@@ -127,9 +84,8 @@ describe('core module', () => {
           (func $f)
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const module = parseModule(input)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
       expect(module).toEqual({
         type: 'module',
         definitions: [
@@ -154,9 +110,8 @@ describe('core module', () => {
           (import "imp" "f" (func $f))
         )
       `
-      const parser = Parser()
-      const input = parser(wat)
-      const module = parseModule(input)
+      const parseSexp = SexpParser()
+      const module = pipe(parseSexp, parse)(wat)
       expect(module).toEqual({
         type: 'module',
         definitions: [

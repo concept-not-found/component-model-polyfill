@@ -1,6 +1,6 @@
 import { oneOf } from 'patcom'
 
-import { sexp, value } from './grammar.js'
+import { sexp, value } from './index.js'
 
 describe('matcher', () => {
   describe('oneOf', () => {

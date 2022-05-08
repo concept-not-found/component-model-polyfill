@@ -1,8 +1,10 @@
-import watParser from './parser/index.js'
+import { Parser as SexpParser } from './sexp/index.js'
 import pipe from './pipe.js'
 
-import indexComponent from './index-component/index.js'
-import parseComponent from './index-component/grammar.js'
+import {
+  parse as parseComponent,
+  index as indexComponent,
+} from './component/index.js'
 
 const createComponentConfig = (node, ancestors = [node]) => {
   if (node.type !== 'component') {
@@ -158,7 +160,7 @@ const createComponentConfig = (node, ancestors = [node]) => {
 }
 
 export default pipe(
-  watParser({ sourceTags: ['module'] }),
+  SexpParser({ sourceTags: ['module'] }),
   parseComponent,
   (node) => {
     indexComponent(node)

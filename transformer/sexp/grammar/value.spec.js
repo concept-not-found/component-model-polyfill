@@ -1,5 +1,5 @@
 import { matchPredicate } from 'patcom'
-import { value } from './grammar.js'
+import { value } from './index.js'
 
 describe('matcher', () => {
   describe('value', () => {

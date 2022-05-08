@@ -12,20 +12,7 @@ import {
   otherwise,
 } from 'patcom'
 
-export const reference = () => {
-  const referenceMatcher = IteratorMatcher((iterator) => {
-    if (!referenceMatcher.matcher) {
-      throw new Error('reference.matcher has not been set yet')
-    }
-    return referenceMatcher.matcher(iterator)
-  })
-
-  Object.defineProperty(referenceMatcher, 'matcher', {
-    matcher: undefined,
-    writable: true,
-  })
-  return referenceMatcher
-}
+import { reference } from './grammar/index.js'
 
 const lineEnding = oneOf(group('\r', '\n'), '\r', '\n')
 const sexpStart = '('

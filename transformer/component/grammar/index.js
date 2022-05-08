@@ -1,9 +1,8 @@
-import { match, group, maybe, some, rest, oneOf, when } from 'patcom'
+import { group, maybe, some, rest, oneOf, when } from 'patcom'
 
-import { reference } from '../parser/index.js'
-import { sexp, value, string } from '../parser/grammar.js'
+import { sexp, value, string, reference } from '../../sexp/index.js'
 
-import { module } from '../index-module/grammar.js'
+import { module } from '../../module/index.js'
 
 function parseIndex(index) {
   if (index.startsWith('$')) {
@@ -402,7 +401,8 @@ const definition = oneOf(
   componentReference,
   sexp(rest)
 )
-const component = when(
+
+export const component = when(
   sexp(value('component'), maybe(name), maybe(some(definition)), rest),
   ([, name, definitions = []]) => {
     return {
@@ -413,5 +413,3 @@ const component = when(
   }
 )
 componentReference.matcher = component
-
-export default (wat) => match(wat)(component)

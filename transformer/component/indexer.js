@@ -1,4 +1,4 @@
-import indexModule from '../index-module/index.js'
+import { index as indexModule } from '../module/index.js'
 import kindCollection from '../kind-collection.js'
 
 // declared empty to avoid no-use-before-define

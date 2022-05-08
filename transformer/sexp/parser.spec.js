@@ -1,12 +1,12 @@
 import { some, asInternalIterator } from 'patcom'
 
-import Parser, {
+import SexpParser, {
   valueMatcher,
   stringMatcher,
   sexpMatcher,
   blockCommentMatcher,
   lineCommentMatcher,
-} from './index.js'
+} from './parser.js'
 
 describe('parser', () => {
   describe('valueMatcher', () => {
@@ -349,7 +349,7 @@ describe('parser', () => {
         (module (;1;))
       )
     `
-    const parser = Parser({
+    const parser = SexpParser({
       sourceTags: ['module'],
     })
     const result = parser(wat)
