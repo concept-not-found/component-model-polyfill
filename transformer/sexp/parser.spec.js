@@ -9,25 +9,44 @@ import SexpParser, {
 } from './parser.js'
 
 describe('parser', () => {
-  describe('valueMatcher', () => {
-    test('matched value', () => {
-      const wat = 'module'
+  describe('valueMatcher matches everything until a deliminator', () => {
+    test.each([
+      { wat: 'foo', deliminator: 'end of file' },
+      { wat: 'foo(bar', deliminator: 'start of sexp' },
+      { wat: 'foo)bar', deliminator: 'end of sexp' },
+      { wat: 'foo bar', deliminator: 'whitespace' },
+      { wat: 'foo"bar', deliminator: 'string' },
+      { wat: 'foo(;bar', deliminator: 'start of block comment' },
+      { wat: 'foo;)bar', deliminator: 'end of block comment' },
+      { wat: 'foo;;bar', deliminator: 'line comment' },
+    ])('matched “$wat” up to $deliminator deliminator', ({ wat }) => {
       const matcher = valueMatcher
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toMatchObject({
         type: 'value',
-        value: 'module',
+        value: 'foo',
       })
     })
 
-    test('unmatched sexp', () => {
-      const wat = '(module)'
-      const matcher = valueMatcher
-      const result = matcher(asInternalIterator(wat))
+    test.each([
+      { wat: '', deliminator: 'end of file' },
+      { wat: '(foo', deliminator: 'start of sexp' },
+      { wat: ')foo', deliminator: 'end of sexp' },
+      { wat: ' foo', deliminator: 'whitespace' },
+      { wat: '"foo', deliminator: 'string' },
+      { wat: '(;foo', deliminator: 'start of block comment' },
+      { wat: ';)foo', deliminator: 'end of block comment' },
+      { wat: ';;foo', deliminator: 'line comment' },
+    ])(
+      'unmatched “$wat” as starts with $deliminator deliminator',
+      ({ wat }) => {
+        const matcher = valueMatcher
+        const result = matcher(asInternalIterator(wat))
 
-      expect(result.matched).toBe(false)
-    })
+        expect(result.matched).toBe(false)
+      }
+    )
   })
 
   describe('stringMatcher', () => {
