@@ -59,13 +59,10 @@ const whitespaceMatcher = when(some(whitespace), (value) => {
   }
 })
 
-const blockCommentChildrenMatcher = reference()
+const nestedBlockComment = reference()
+
 export const blockCommentMatcher = when(
-  group(
-    blockCommentStart,
-    maybe(some(blockCommentChildrenMatcher)),
-    blockCommentEnd
-  ),
+  group(blockCommentStart, maybe(some(nestedBlockComment)), blockCommentEnd),
   ([, value = []]) => {
     return {
       type: 'block comment',
@@ -73,6 +70,7 @@ export const blockCommentMatcher = when(
     }
   }
 )
+
 const blockCommentValueMatcher = when(
   some(not(oneOf(blockCommentStart, blockCommentEnd))),
   (value) => {
@@ -82,7 +80,8 @@ const blockCommentValueMatcher = when(
     }
   }
 )
-blockCommentChildrenMatcher.matcher = oneOf(
+
+nestedBlockComment.matcher = oneOf(
   blockCommentMatcher,
   blockCommentValueMatcher
 )
@@ -139,12 +138,12 @@ export const SexpMatcher = ({
   sourceTags = [],
   trimTypes = ['block comment', 'line comment', 'whitespace'],
 } = {}) => {
-  const nested = reference()
+  const nestedSexp = reference()
 
   const sourceable = Sourceable(sourceTags)
 
   const sexpMatcherInstance = when(
-    sourceable(group(sexpStart, maybe(some(nested)), sexpEnd)),
+    sourceable(group(sexpStart, maybe(some(nestedSexp)), sexpEnd)),
     ([, children = []], { source } = {}) => {
       const result = {
         type: 'sexp',
@@ -155,7 +154,7 @@ export const SexpMatcher = ({
     }
   )
 
-  nested.matcher = oneOf(
+  nestedSexp.matcher = oneOf(
     blockCommentMatcher,
     sexpMatcherInstance,
     lineCommentMatcher,

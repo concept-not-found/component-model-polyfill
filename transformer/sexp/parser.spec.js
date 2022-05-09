@@ -59,26 +59,29 @@ describe('parser', () => {
 
   describe('stringMatcher matches anything between double quotes “"”', () => {
     test.each([
-      { wat: '""', value: '' },
-      { wat: '"foo"', value: 'foo' },
-    ])('matched “$wat” as “$value”', ({ wat, value }) => {
+      { wat: '""', value: '', reason: 'empty string' },
+      {
+        wat: '"foo\nbar"',
+        value: 'foo\nbar',
+        reason: 'string can contain newlines',
+      },
+      {
+        wat: '"foo (bar)"',
+        value: 'foo (bar)',
+        reason: 'strings can contain anything',
+      },
+      {
+        wat: '"foo\\""',
+        value: 'foo\\"',
+        reason: 'double quotes “"” being escaped with “\\"”',
+      },
+    ])('matched “$wat” as “$value” due to $reason', ({ wat, value }) => {
       const matcher = stringMatcher
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toMatchObject({
         type: 'string',
         value,
-      })
-    })
-
-    test('matched “"foo\\""” as “foo"” as double quotes can be escaped with “\\"”', () => {
-      const wat = '"foo\\""'
-      const matcher = stringMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toMatchObject({
-        type: 'string',
-        value: 'foo\\"',
       })
     })
 
@@ -197,6 +200,7 @@ describe('parser', () => {
         expect(result.value.value[1].source).toBe('(some-tag some-other-value)')
       })
     })
+
     describe('trimTypes option removes nested items of matching type', () => {
       test('by default block comment, line comment and whitespace are removed', () => {
         const wat =
@@ -275,113 +279,83 @@ describe('parser', () => {
     })
   })
 
-  describe('block comments', () => {
-    test('block comment', () => {
-      const wat = '(;;)'
-      const matcher = blockCommentMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toEqual({
-        type: 'block comment',
-        value: [],
-      })
-    })
-
-    test('block comment with value', () => {
-      const wat = '(;abc;)'
-      const matcher = blockCommentMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toEqual({
-        type: 'block comment',
+  describe('blockCommentMatcher matches multi-line comments surrounded by “(;” and “;)”', () => {
+    test.each([
+      { wat: '(;;)', value: [], reason: 'block comment able to be empty' },
+      {
+        wat: '(;foo (bar);)',
+        value: [{ type: 'block comment value', value: 'foo (bar)' }],
+        reason: 'block comment able to contain anything',
+      },
+      {
+        wat: '(;foo\nbar;)',
+        value: [{ type: 'block comment value', value: 'foo\nbar' }],
+        reason: 'block comment able to contain newlines',
+      },
+      {
+        wat: '(;foo(;bar;)baz;)',
         value: [
-          {
-            type: 'block comment value',
-            value: 'abc',
-          },
-        ],
-      })
-    })
-
-    test('nested block comments', () => {
-      const wat = '(;aa(;bb;)cc;)'
-      const matcher = blockCommentMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toEqual({
-        type: 'block comment',
-        value: [
-          {
-            type: 'block comment value',
-            value: 'aa',
-          },
+          { type: 'block comment value', value: 'foo' },
           {
             type: 'block comment',
-            value: [
-              {
-                type: 'block comment value',
-                value: 'bb',
-              },
-            ],
+            value: [{ type: 'block comment value', value: 'bar' }],
           },
-          {
-            type: 'block comment value',
-            value: 'cc',
-          },
+          { type: 'block comment value', value: 'baz' },
         ],
-      })
-    })
-
-    test('more nested block comments', () => {
-      const wat = '(;(;(;;);)(;;)(;(;;););)'
-      const matcher = blockCommentMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toEqual({
-        type: 'block comment',
+        reason: 'nested block comment',
+      },
+      {
+        wat: '(;(;foo;)bar(;baz;);)',
         value: [
           {
             type: 'block comment',
-            value: [{ type: 'block comment', value: [] }],
+            value: [{ type: 'block comment value', value: 'foo' }],
           },
-          { type: 'block comment', value: [] },
+          { type: 'block comment value', value: 'bar' },
           {
             type: 'block comment',
-            value: [{ type: 'block comment', value: [] }],
+            value: [{ type: 'block comment value', value: 'baz' }],
           },
         ],
-      })
-    })
-    test('line comments is just text within a block comment', () => {
-      const wat = '(;;;line comment;;;)'
+        reason: 'nested block comment',
+      },
+      {
+        wat: '(; ;; foo ;)\n',
+        value: [{ type: 'block comment value', value: ' ;; foo ' }],
+        reason: 'block comment taking presedent over line comment',
+      },
+    ])('matched $wat due to $reason', ({ wat, value }) => {
       const matcher = blockCommentMatcher
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toEqual({
         type: 'block comment',
-        value: [
-          {
-            type: 'block comment value',
-            value: ';;line comment;;',
-          },
-        ],
+        value,
       })
     })
 
-    test('block comments can contain newlines', () => {
-      const wat = '(;\n;)'
+    test.each([
+      {
+        wat: 'foo;)',
+        reason: 'missing starting “(;”',
+      },
+      {
+        wat: '(;foo',
+        reason: 'missing ending “;)”',
+      },
+      {
+        wat: ';)(;',
+        reason: '“(;” must come before “;)“',
+      },
+      {
+        wat: '(;(;foo;)',
+        reason: 'block comment requiring proper nesting',
+      },
+    ])('unmatched $wat due to $reason', ({ wat, value }) => {
       const matcher = blockCommentMatcher
       const result = matcher(asInternalIterator(wat))
 
-      expect(result.value).toEqual({
-        type: 'block comment',
-        value: [
-          {
-            type: 'block comment value',
-            value: '\n',
-          },
-        ],
-      })
+      expect(result.matched).toBe(false)
     })
   })
 
