@@ -1,9 +1,9 @@
-import { some, asInternalIterator } from 'patcom'
+import { asInternalIterator } from 'patcom'
 
 import SexpParser, {
   valueMatcher,
   stringMatcher,
-  sexpMatcher,
+  SexpMatcher,
   blockCommentMatcher,
   lineCommentMatcher,
 } from './parser.js'
@@ -49,7 +49,7 @@ describe('parser', () => {
     )
   })
 
-  describe('stringMatcher matches anything between double quotes', () => {
+  describe('stringMatcher matches anything between double quotes “"”', () => {
     test.each([
       { wat: '""', value: '' },
       { wat: '"foo"', value: 'foo' },
@@ -86,131 +86,108 @@ describe('parser', () => {
     })
   })
 
-  describe('sexpMatcher', () => {
-    test('matched sexp of value', () => {
-      const wat = '(module)'
-      const matcher = sexpMatcher()
+  describe('SexpMatcher matches nested items between left parenthesis “(” and right parenthesis “)”', () => {
+    test.each([
+      { wat: '()', value: [], reason: 'sexp nests nothing' },
+      {
+        wat: '(foo)',
+        value: [{ type: 'value', value: 'foo' }],
+        reason: 'sexp can nest a value',
+      },
+      {
+        wat: '(())',
+        value: [{ type: 'sexp', value: [] }],
+        reason: 'sexp can nest another sexp',
+      },
+      {
+        wat: '(foo bar)',
+        value: [
+          { type: 'value', value: 'foo' },
+          { type: 'value', value: 'bar' },
+        ],
+        reason: 'sexp can nest multiple values deliminated by whitespace',
+      },
+      {
+        wat: '(value "string" (nested) (;block comment;) ;;line comment\n)',
+        value: [
+          { type: 'value', value: 'value' },
+          { type: 'string', value: 'string' },
+          { type: 'sexp', value: [{ type: 'value', value: 'nested' }] },
+          {
+            type: 'block comment',
+            value: [{ type: 'block comment value', value: 'block comment' }],
+          },
+          { type: 'line comment', value: 'line comment' },
+        ],
+        reason: 'sexp can nest items of all kinds',
+      },
+    ])('matched “$wat” as $reason', ({ wat, value }) => {
+      const matcher = SexpMatcher({ trimChildren: ['whitespace'] })
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toMatchObject({
         type: 'sexp',
-        value: [
-          {
-            type: 'value',
-            value: 'module',
-          },
-        ],
+        value,
       })
     })
 
-    test('matched multiple sexps of value', () => {
-      const wat = '(module)(module)'
-      const matcher = some(sexpMatcher())
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toMatchObject([
-        {
-          type: 'sexp',
-          value: [
-            {
-              type: 'value',
-              value: 'module',
-            },
-          ],
-        },
-        {
-          type: 'sexp',
-          value: [
-            {
-              type: 'value',
-              value: 'module',
-            },
-          ],
-        },
-      ])
-    })
-
-    test('matched nested sexps of value', () => {
-      const wat = '(module(func))'
-      const matcher = sexpMatcher()
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toMatchObject({
-        type: 'sexp',
-        value: [
-          {
-            type: 'value',
-            value: 'module',
-          },
-          {
-            type: 'sexp',
-            value: [
-              {
-                type: 'value',
-                value: 'func',
-              },
-            ],
-          },
-        ],
-      })
-    })
-
-    test('matched sexp of multiple values', () => {
-      const wat = '(module $m)'
-      const matcher = sexpMatcher()
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toMatchObject({
-        type: 'sexp',
-        value: [
-          {
-            type: 'value',
-            value: 'module',
-          },
-          {
-            type: 'value',
-            value: '$m',
-          },
-        ],
-      })
-    })
-
-    test('unmatched value', () => {
-      const wat = 'module'
-      const matcher = sexpMatcher()
+    test.each([
+      { wat: 'foo)', reason: 'missing starting left parenthesis “(”' },
+      { wat: '(foo', reason: 'missing ending right parenthesis “)”' },
+      { wat: ')(', reason: 'cannot start with right parenthesis “)”' },
+    ])('unmatched “$wat” as $reason', ({ wat }) => {
+      const matcher = SexpMatcher()
       const result = matcher(asInternalIterator(wat))
 
       expect(result.matched).toBe(false)
     })
 
-    test('value, strings, block comments and line comments are distinguishable', () => {
-      const wat = '(func"func"(;func;);;func\n)'
-      const matcher = sexpMatcher({ trimChildren: [] })
-      const result = matcher(asInternalIterator(wat))
+    describe('sourceTags option captures original source of sexp to the source field, when first nested value is in the sourceTags array', () => {
+      test('by default nothing is capatured if no sourceTags are provided', () => {
+        const wat = '(some-tag some-value\nsome-value-after-newline)'
+        const matcher = SexpMatcher()
+        const result = matcher(asInternalIterator(wat))
 
-      expect(result.value.value).toEqual([
-        {
-          type: 'value',
-          value: 'func',
-        },
-        {
-          type: 'string',
-          value: 'func',
-        },
-        {
-          type: 'block comment',
-          value: [
-            {
-              type: 'block comment value',
-              value: 'func',
-            },
-          ],
-        },
-        {
-          type: 'line comment',
-          value: 'func',
-        },
-      ])
+        expect(result.source).toBeUndefined()
+      })
+
+      test('original source including whitespace is captured when tag is within sourceTags', () => {
+        const wat = '(some-tag some-value\nsome-value-after-newline)'
+        const matcher = SexpMatcher({ sourceTags: ['some-tag'] })
+        const result = matcher(asInternalIterator(wat))
+
+        expect(result.source).toBe(
+          '(some-tag some-value\nsome-value-after-newline)'
+        )
+      })
+
+      test('nested sexp source can be captured', () => {
+        const wat = '(some-containg-sexp (some-tag some-value))'
+        const matcher = SexpMatcher({ sourceTags: ['some-tag'] })
+        const result = matcher(asInternalIterator(wat))
+
+        expect(result.source).toBeUndefined()
+        expect(result.value.value[1].source).toBe('(some-tag some-value)')
+      })
+
+      test('multiple sourceTags can be provided to capture different sexp', () => {
+        const wat = '((first-tag) (second-tag) (but-not-third-tag))'
+        const matcher = SexpMatcher({ sourceTags: ['first-tag', 'second-tag'] })
+        const result = matcher(asInternalIterator(wat))
+
+        expect(result.value.value[0].source).toBe('(first-tag)')
+        expect(result.value.value[1].source).toBe('(second-tag)')
+        expect(result.value.value[2].source).toBeUndefined()
+      })
+
+      test('a single sourceTags can capture different sexp', () => {
+        const wat = '((some-tag some-value) (some-tag some-other-value))'
+        const matcher = SexpMatcher({ sourceTags: ['some-tag'] })
+        const result = matcher(asInternalIterator(wat))
+
+        expect(result.value.value[0].source).toBe('(some-tag some-value)')
+        expect(result.value.value[1].source).toBe('(some-tag some-other-value)')
+      })
     })
   })
 

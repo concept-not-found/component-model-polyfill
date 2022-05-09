@@ -97,66 +97,64 @@ export const lineCommentMatcher = when(
   }
 )
 
-const sourceable = (matcher) =>
-  IteratorMatcher((iterator) => {
-    const start = iterator.now
-    const result = matcher(iterator)
-    const end = iterator.now
-    if (result.matched) {
-      return {
-        ...result,
-        get source() {
-          const time = iterator.now
-          const source = []
-          iterator.jump(start)
-          for (let index = start; index < end; index++) {
-            source.push(iterator.next().value)
-          }
-          iterator.jump(time)
-          return source.join('')
-        },
-      }
-    }
-    return result
-  })
-
-export const sexpMatcher = ({
-  sourceTags = [],
-  trimChildren = ['block comment', 'line comment', 'whitespace'],
-} = {}) => {
-  const sexpChildren = reference()
-
-  const sexpMatcherInstance = when(
-    sourceable(group(sexpStart, some(sexpChildren), sexpEnd)),
-    ([, children], sourcable) => {
-      const result = {
-        type: 'sexp',
-        value: children.filter(({ type }) => !trimChildren.includes(type)),
-      }
+const Sourceable =
+  (sourceTags = []) =>
+  (matcher) =>
+    IteratorMatcher((iterator) => {
+      const start = iterator.now
+      const result = matcher(iterator)
+      const end = iterator.now
 
       return match(result)(
         when(
           {
-            type: 'sexp',
+            matched: true,
             value: [
-              {
-                type: 'value',
-                value: oneOf(...sourceTags),
-              },
+              '(',
+              [{ type: 'value', value: oneOf(...sourceTags) }, rest],
               rest,
             ],
+            rest,
           },
           () => {
-            result.source = sourcable.source
-            return result
+            const time = iterator.now
+            const source = []
+            iterator.jump(start)
+            for (let index = start; index < end; index++) {
+              source.push(iterator.next().value)
+            }
+            iterator.jump(time)
+            return {
+              ...result,
+              source: source.join(''),
+            }
           }
         ),
         otherwise(() => result)
       )
+    })
+
+export const SexpMatcher = ({
+  sourceTags = [],
+  trimChildren = ['block comment', 'line comment', 'whitespace'],
+} = {}) => {
+  const nested = reference()
+
+  const sourceable = Sourceable(sourceTags)
+
+  const sexpMatcherInstance = when(
+    sourceable(group(sexpStart, maybe(some(nested)), sexpEnd)),
+    ([, children = []], { source } = {}) => {
+      const result = {
+        type: 'sexp',
+        value: children.filter(({ type }) => !trimChildren.includes(type)),
+        source,
+      }
+      return result
     }
   )
 
-  sexpChildren.matcher = oneOf(
+  nested.matcher = oneOf(
     blockCommentMatcher,
     sexpMatcherInstance,
     lineCommentMatcher,
@@ -173,7 +171,7 @@ export default (...parameters) =>
       when(
         group(
           maybe(whitespaceMatcher),
-          maybe(sexpMatcher(...parameters)),
+          maybe(SexpMatcher(...parameters)),
           maybe(whitespaceMatcher)
         ),
         ([, sexp]) => sexp
