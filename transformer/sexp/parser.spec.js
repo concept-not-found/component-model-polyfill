@@ -324,7 +324,7 @@ describe('parser', () => {
         value: [{ type: 'block comment value', value: ' ;; foo ' }],
         reason: 'block comment taking presedent over line comment',
       },
-    ])('matched $wat due to $reason', ({ wat, value }) => {
+    ])('matched “$wat” due to $reason', ({ wat, value }) => {
       const matcher = blockCommentMatcher
       const result = matcher(asInternalIterator(wat))
 
@@ -351,7 +351,7 @@ describe('parser', () => {
         wat: '(;(;foo;)',
         reason: 'block comment requiring proper nesting',
       },
-    ])('unmatched $wat due to $reason', ({ wat, value }) => {
+    ])('unmatched “$wat” due to $reason', ({ wat, value }) => {
       const matcher = blockCommentMatcher
       const result = matcher(asInternalIterator(wat))
 
@@ -359,35 +359,37 @@ describe('parser', () => {
     })
   })
 
-  describe('line comment', () => {
-    test('matched empty line comment', () => {
-      const wat = ';;\n'
+  describe('lineCommentMatcher matches anything between “;;“ and end of line', () => {
+    test.each([
+      { wat: ';;\n', value: '', reason: 'line comment able to match empty' },
+      {
+        wat: ';;foo (bar) (;baz;)\n',
+        value: 'foo (bar) (;baz;)',
+        reason: 'line comment able to match anything',
+      },
+      {
+        wat: ';;foo',
+        value: 'foo',
+        reason: 'end of file counts as end of line',
+      },
+    ])('matched “$wat” as “$value” due to $reason', ({ wat, value }) => {
       const matcher = lineCommentMatcher
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toEqual({
         type: 'line comment',
-        value: '',
+        value,
       })
     })
 
-    test('matched line comment', () => {
-      const wat = ';;todo write a comment\n'
-      const matcher = lineCommentMatcher
-      const result = matcher(asInternalIterator(wat))
+    test.each([{ wat: 'foo\n', reason: 'missing line comment start “;;”' }])(
+      'unmatched “$wat” due to $reason',
+      ({ wat }) => {
+        const matcher = lineCommentMatcher
+        const result = matcher(asInternalIterator(wat))
 
-      expect(result.value).toEqual({
-        type: 'line comment',
-        value: 'todo write a comment',
-      })
-    })
-
-    test('unmatched value', () => {
-      const wat = 'module'
-      const matcher = lineCommentMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.matched).toBe(false)
-    })
+        expect(result.matched).toBe(false)
+      }
+    )
   })
 })

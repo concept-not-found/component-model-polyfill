@@ -86,8 +86,19 @@ nestedBlockComment.matcher = oneOf(
   blockCommentValueMatcher
 )
 
+const endOfFile = IteratorMatcher((iterator) => {
+  const { done } = iterator.next()
+  return {
+    matched: done,
+  }
+})
+
 export const lineCommentMatcher = when(
-  group(lineCommentStart, maybe(some(not(lineEnding))), lineEnding),
+  group(
+    lineCommentStart,
+    maybe(some(not(lineEnding))),
+    oneOf(lineEnding, endOfFile)
+  ),
   ([, value = []]) => {
     return {
       type: 'line comment',
@@ -135,7 +146,7 @@ const Sourceable =
     })
 
 export const SexpMatcher = ({
-  sourceTags = [],
+  sourceTags,
   trimTypes = ['block comment', 'line comment', 'whitespace'],
 } = {}) => {
   const nestedSexp = reference()
@@ -144,7 +155,7 @@ export const SexpMatcher = ({
 
   const sexpMatcherInstance = when(
     sourceable(group(sexpStart, maybe(some(nestedSexp)), sexpEnd)),
-    ([, children = []], { source } = {}) => {
+    ([, children = []], { source }) => {
       const result = {
         type: 'sexp',
         value: children.filter(({ type }) => !trimTypes.includes(type)),
@@ -164,13 +175,6 @@ export const SexpMatcher = ({
   )
   return sexpMatcherInstance
 }
-
-const endOfFile = IteratorMatcher((iterator) => {
-  const { done } = iterator.next()
-  return {
-    matched: done,
-  }
-})
 
 export default (...parameters) =>
   (wat) =>
