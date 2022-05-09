@@ -166,6 +166,13 @@ export const SexpMatcher = ({
   return sexpMatcherInstance
 }
 
+const endOfFile = IteratorMatcher((iterator) => {
+  const { done } = iterator.next()
+  return {
+    matched: done,
+  }
+})
+
 export default (...parameters) =>
   (wat) =>
     match(asInternalIterator(wat))(
@@ -173,7 +180,8 @@ export default (...parameters) =>
         group(
           maybe(whitespaceMatcher),
           maybe(SexpMatcher(...parameters)),
-          maybe(whitespaceMatcher)
+          maybe(whitespaceMatcher),
+          endOfFile
         ),
         ([, sexp]) => sexp
       )

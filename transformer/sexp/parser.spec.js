@@ -15,6 +15,10 @@ describe('parser', () => {
       { wat: 'foo(bar', deliminator: 'start of sexp' },
       { wat: 'foo)bar', deliminator: 'end of sexp' },
       { wat: 'foo bar', deliminator: 'whitespace' },
+      { wat: 'foo\tbar', deliminator: 'whitespace' },
+      { wat: 'foo\r\nbar', deliminator: 'whitespace' },
+      { wat: 'foo\rbar', deliminator: 'whitespace' },
+      { wat: 'foo\nbar', deliminator: 'whitespace' },
       { wat: 'foo"bar', deliminator: 'string' },
       { wat: 'foo(;bar', deliminator: 'start of block comment' },
       { wat: 'foo;)bar', deliminator: 'end of block comment' },
@@ -34,6 +38,10 @@ describe('parser', () => {
       { wat: '(foo', deliminator: 'start of sexp' },
       { wat: ')foo', deliminator: 'end of sexp' },
       { wat: ' foo', deliminator: 'whitespace' },
+      { wat: '\tfoo', deliminator: 'whitespace' },
+      { wat: '\r\nfoo', deliminator: 'whitespace' },
+      { wat: '\rfoo', deliminator: 'whitespace' },
+      { wat: '\nfoo', deliminator: 'whitespace' },
       { wat: '"foo', deliminator: 'string' },
       { wat: '(;foo', deliminator: 'start of block comment' },
       { wat: ';)foo', deliminator: 'end of block comment' },
@@ -236,6 +244,34 @@ describe('parser', () => {
           ],
         })
       })
+    })
+  })
+
+  describe('SexpParser parses a single sexp', () => {
+    test('surrounding whitespace is ignored', () => {
+      const wat = ' (note-leading-and-trailing-whitespace) '
+      const parser = SexpParser()
+      const result = parser(wat)
+
+      expect(result).toMatchObject({
+        type: 'sexp',
+        value: [
+          {
+            type: 'value',
+            value: 'note-leading-and-trailing-whitespace',
+          },
+        ],
+      })
+    })
+
+    test.each([
+      { wat: 'value', reason: 'top-level item must be a sexp' },
+      { wat: '(first)(second)', reason: 'too many top-level sexps' },
+    ])('fails to parse $wat due to $reason', ({ wat }) => {
+      const parser = SexpParser()
+      const result = parser(wat)
+
+      expect(result).toBeUndefined()
     })
   })
 
