@@ -122,7 +122,7 @@ describe('parser', () => {
         reason: 'sexp can nest items of all kinds',
       },
     ])('matched “$wat” as $reason', ({ wat, value }) => {
-      const matcher = SexpMatcher({ trimChildren: ['whitespace'] })
+      const matcher = SexpMatcher({ trimTypes: ['whitespace'] })
       const result = matcher(asInternalIterator(wat))
 
       expect(result.value).toMatchObject({
@@ -187,6 +187,54 @@ describe('parser', () => {
 
         expect(result.value.value[0].source).toBe('(some-tag some-value)')
         expect(result.value.value[1].source).toBe('(some-tag some-other-value)')
+      })
+    })
+    describe('trimTypes option removes nested items of matching type', () => {
+      test('by default block comment, line comment and whitespace are removed', () => {
+        const wat =
+          '(some-value "some string" (some-nested-sexp) (;block comment;) ;;line comment\n)'
+        const matcher = SexpMatcher()
+        const result = matcher(asInternalIterator(wat))
+
+        expect(result.value).toMatchObject({
+          type: 'sexp',
+          value: [
+            { type: 'value', value: 'some-value' },
+            { type: 'string', value: 'some string' },
+            {
+              type: 'sexp',
+              value: [{ type: 'value', value: 'some-nested-sexp' }],
+            },
+          ],
+        })
+      })
+
+      test('everything can be retained by trimming no types', () => {
+        const wat =
+          '(some-value "some string" (some-nested-sexp) (;block comment;) ;;line comment\n)'
+        const matcher = SexpMatcher({ trimTypes: [] })
+        const result = matcher(asInternalIterator(wat))
+
+        expect(result.value).toMatchObject({
+          type: 'sexp',
+          value: [
+            { type: 'value', value: 'some-value' },
+            { type: 'whitespace', value: ' ' },
+            { type: 'string', value: 'some string' },
+            { type: 'whitespace', value: ' ' },
+            {
+              type: 'sexp',
+              value: [{ type: 'value', value: 'some-nested-sexp' }],
+            },
+            { type: 'whitespace', value: ' ' },
+            {
+              type: 'block comment',
+              value: [{ type: 'block comment value', value: 'block comment' }],
+            },
+            { type: 'whitespace', value: ' ' },
+            { type: 'line comment', value: 'line comment' },
+          ],
+        })
       })
     })
   })
@@ -331,22 +379,5 @@ describe('parser', () => {
 
       expect(result.matched).toBe(false)
     })
-  })
-
-  test('capture an sexp by tag', () => {
-    const wat = `
-      (component (;0;)
-        (module (;1;))
-      )
-    `
-    const parser = SexpParser({
-      sourceTags: ['module'],
-    })
-    const result = parser(wat)
-    const {
-      value: [, { source }],
-    } = result
-
-    expect(source).toBe('(module (;1;))')
   })
 })

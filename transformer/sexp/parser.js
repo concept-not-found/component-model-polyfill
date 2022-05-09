@@ -110,7 +110,7 @@ const Sourceable =
           {
             matched: true,
             value: [
-              '(',
+              sexpStart,
               [{ type: 'value', value: oneOf(...sourceTags) }, rest],
               rest,
             ],
@@ -124,6 +124,7 @@ const Sourceable =
               source.push(iterator.next().value)
             }
             iterator.jump(time)
+
             return {
               ...result,
               source: source.join(''),
@@ -136,7 +137,7 @@ const Sourceable =
 
 export const SexpMatcher = ({
   sourceTags = [],
-  trimChildren = ['block comment', 'line comment', 'whitespace'],
+  trimTypes = ['block comment', 'line comment', 'whitespace'],
 } = {}) => {
   const nested = reference()
 
@@ -147,7 +148,7 @@ export const SexpMatcher = ({
     ([, children = []], { source } = {}) => {
       const result = {
         type: 'sexp',
-        value: children.filter(({ type }) => !trimChildren.includes(type)),
+        value: children.filter(({ type }) => !trimTypes.includes(type)),
         source,
       }
       return result
