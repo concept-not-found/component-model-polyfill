@@ -264,6 +264,7 @@ component = (node) => {
   indexImports(node)
   indexAliases(node)
   indexExports(node)
+  return node
 }
 
 export default component

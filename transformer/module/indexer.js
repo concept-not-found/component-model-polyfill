@@ -1,31 +1,31 @@
 import { coreKindCollection } from '../kind-collection.js'
 
-function resolveIndex(moduleNode, kind, kindIdx) {
+function resolveIndex(node, kind, kindIdx) {
   const collection = coreKindCollection[kind]
   return typeof kindIdx === 'number'
     ? kindIdx
-    : moduleNode.symbolIndex[collection][kindIdx]
+    : node.symbolIndex[collection][kindIdx]
 }
 
-function directPath(moduleNode, kind, kindIdx) {
+function directPath(node, kind, kindIdx) {
   const collection = coreKindCollection[kind]
-  return [collection, resolveIndex(moduleNode, kind, kindIdx)]
+  return [collection, resolveIndex(node, kind, kindIdx)]
 }
 
-const indexExports = (moduleNode) => {
-  for (const node of moduleNode.exports) {
-    Object.defineProperty(node, 'path', {
+const indexExports = (node) => {
+  for (const exp of node.exports) {
+    Object.defineProperty(exp, 'path', {
       value() {
         const {
           kindReference: { kind, kindIdx },
-        } = node
-        return directPath(moduleNode, kind, kindIdx)
+        } = exp
+        return directPath(node, kind, kindIdx)
       },
     })
   }
 }
 
-const indexDefinitions = (moduleNode) => {
+const indexDefinitions = (node) => {
   const matchers = [
     ...Object.entries({ ...coreKindCollection, export: 'exports' }).map(
       ([kind, collection]) => [collection, ({ type }) => type === kind]
@@ -33,26 +33,27 @@ const indexDefinitions = (moduleNode) => {
     ['imports', ({ import: imp }) => imp],
   ]
   for (const [collection, matcher] of matchers) {
-    moduleNode[collection] = moduleNode.definitions.filter(matcher)
+    node[collection] = node.definitions.filter(matcher)
   }
-  delete moduleNode.definitions
+  delete node.definitions
 }
 
-const indexSymbols = (moduleNode) => {
-  moduleNode.symbolIndex = {}
+const indexSymbols = (node) => {
+  node.symbolIndex = {}
   for (const collection of Object.values(coreKindCollection)) {
-    moduleNode.symbolIndex[collection] = {}
+    node.symbolIndex[collection] = {}
 
-    for (const [kindIdx, { name }] of moduleNode[collection].entries()) {
+    for (const [kindIdx, { name }] of node[collection].entries()) {
       if (name) {
-        moduleNode.symbolIndex[collection][name] = kindIdx
+        node.symbolIndex[collection][name] = kindIdx
       }
     }
   }
 }
 
-export default (moduleNode) => {
-  indexDefinitions(moduleNode)
-  indexSymbols(moduleNode)
-  indexExports(moduleNode)
+export default (node) => {
+  indexDefinitions(node)
+  indexSymbols(node)
+  indexExports(node)
+  return node
 }

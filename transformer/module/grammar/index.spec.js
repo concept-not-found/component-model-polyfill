@@ -1,7 +1,20 @@
-import { name, kind, kindDefinition } from './index.js'
+import pipe from '../../pipe.js'
+import { Parser as SexpParser } from '../../sexp/index.js'
+import { module, name, kind, kindDefinition } from './index.js'
 
-describe('core module', () => {
+describe('module', () => {
   describe('grammar', () => {
+    describe('a module is a sexp of imports, exports, and kind definitions', () => {
+      test('a module can be empty', () => {
+        const wat = '(module)'
+        const result = pipe(SexpParser(), module)(wat)
+        expect(result.value).toMatchObject({
+          type: 'module',
+          definitions: [],
+        })
+      })
+    })
+
     describe('name', () => {
       test('func', () => {
         const matcher = name
@@ -12,6 +25,7 @@ describe('core module', () => {
         })
       })
     })
+
     describe('kind', () => {
       test('func', () => {
         const matcher = kind
@@ -22,6 +36,7 @@ describe('core module', () => {
         })
       })
     })
+
     describe('kindDefinition', () => {
       test('named func', () => {
         const matcher = kindDefinition

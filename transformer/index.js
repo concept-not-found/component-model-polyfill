@@ -162,9 +162,6 @@ const createComponentConfig = (node, ancestors = [node]) => {
 export default pipe(
   SexpParser({ sourceTags: ['module'] }),
   parseComponent,
-  (node) => {
-    indexComponent(node)
-    return node
-  },
+  indexComponent,
   createComponentConfig
 )

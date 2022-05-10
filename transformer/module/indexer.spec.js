@@ -13,9 +13,7 @@ describe('index module', () => {
         )
       `
 
-      const parseSexp = SexpParser()
-      const module = pipe(parseSexp, parse)(wat)
-      index(module)
+      const module = pipe(SexpParser(), parse, index)(wat)
 
       expect(module.funcs[0]).toEqual({
         type: 'func',
@@ -28,9 +26,7 @@ describe('index module', () => {
         )
       `
 
-      const parseSexp = SexpParser()
-      const module = pipe(parseSexp, parse)(wat)
-      index(module)
+      const module = pipe(SexpParser(), parse, index)(wat)
 
       expect(module.symbolIndex.funcs.$f).toBe(0)
       expect(module.funcs[0]).toEqual({
@@ -49,9 +45,7 @@ describe('index module', () => {
         )
       `
 
-      const parseSexp = SexpParser()
-      const module = pipe(parseSexp, parse)(wat)
-      index(module)
+      const module = pipe(SexpParser(), parse, index)(wat)
 
       expect(module.exports).toEqual([
         {
@@ -74,9 +68,7 @@ describe('index module', () => {
         )
       `
 
-      const parseSexp = SexpParser()
-      const module = pipe(parseSexp, parse)(wat)
-      index(module)
+      const module = pipe(SexpParser(), parse, index)(wat)
 
       expect(module.exports).toEqual([
         {
@@ -100,9 +92,7 @@ describe('index module', () => {
         )
       `
 
-      const parseSexp = SexpParser()
-      const module = pipe(parseSexp, parse)(wat)
-      index(module)
+      const module = pipe(SexpParser(), parse, index)(wat)
 
       const expectedImportFunc = {
         type: 'func',
@@ -122,9 +112,7 @@ describe('index module', () => {
         )
       `
 
-      const parseSexp = SexpParser()
-      const module = pipe(parseSexp, parse)(wat)
-      index(module)
+      const module = pipe(SexpParser(), parse, index)(wat)
 
       expect(module.symbolIndex.funcs.$f).toBe(0)
       const expectedImportFunc = {

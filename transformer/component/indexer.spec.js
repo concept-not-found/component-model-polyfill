@@ -10,9 +10,7 @@ describe('index component', () => {
       (component)
     `
 
-    const parseSexp = SexpParser()
-    const component = pipe(parseSexp, parse)(wat)
-    index(component)
+    const component = pipe(SexpParser(), parse, index)(wat)
 
     expect(component).toEqual({
       type: 'component',
