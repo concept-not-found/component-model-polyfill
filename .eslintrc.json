@@ -88,6 +88,7 @@
       {
         "tags": ["dedent", "onedent"],
         "selectors": [
+          "Property[key.name='wat'] > TemplateLiteral",
           "VariableDeclaration[kind='const'] > VariableDeclarator[id.name='wat'] > TemplateLiteral"
         ]
       }
