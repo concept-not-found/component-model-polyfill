@@ -10,20 +10,19 @@ function parseIndex(index) {
 }
 
 const variable = value()
-export const name = value()
-export const identifier = value(
+const identifier = value(
   matchPredicate((value) => value?.startsWith?.('$') ?? false)
 )
 const anyString = string()
 
-export const kind = oneOf(
+const kind = oneOf(
   value('func'),
   value('memory'),
   value('table'),
   value('global')
 )
-const kindName = [kind, maybe(name)]
-export const kindDefinition = when(sexp(...kindName, rest), ([kind, name]) => {
+const kindName = [kind, maybe(identifier)]
+const kindDefinition = when(sexp(...kindName, rest), ([kind, name]) => {
   return {
     type: kind,
     name,
@@ -33,8 +32,7 @@ export const kindDefinition = when(sexp(...kindName, rest), ([kind, name]) => {
 const importName = [value('import'), anyString, anyString]
 const importFirstDefinition = when(
   sexp(...importName, kindDefinition),
-  ([, moduleName, importName, kindDefinition]) => {
-    const { type, name } = kindDefinition
+  ([, moduleName, importName, { type, name }]) => {
     return {
       type,
       name,
@@ -46,7 +44,7 @@ const importFirstDefinition = when(
   }
 )
 const inlineImportDefinition = when(
-  sexp(...kindName, sexp(...importName)),
+  sexp(...kindName, sexp(...importName), rest),
   ([type, name, [, moduleName, importName]]) => {
     return {
       type,
@@ -58,7 +56,11 @@ const inlineImportDefinition = when(
     }
   }
 )
-const importDefinition = oneOf(importFirstDefinition, inlineImportDefinition)
+
+export const importDefinition = oneOf(
+  importFirstDefinition,
+  inlineImportDefinition
+)
 
 const kindReference = when(sexp(kind, variable), ([kind, kindIdx]) => {
   return {
@@ -68,7 +70,7 @@ const kindReference = when(sexp(kind, variable), ([kind, kindIdx]) => {
 })
 
 const exportName = [value('export'), anyString]
-const exportDefinition = when(
+export const exportDefinition = when(
   sexp(...exportName, kindReference),
   ([, name, kindReference]) => {
     return {

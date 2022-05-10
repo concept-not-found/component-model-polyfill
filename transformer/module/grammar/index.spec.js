@@ -1,6 +1,6 @@
 import pipe from '../../pipe.js'
 import { Parser as SexpParser } from '../../sexp/index.js'
-import { module, name, kind, kindDefinition } from './index.js'
+import { module, importDefinition } from './index.js'
 
 describe('module', () => {
   describe('grammar', () => {
@@ -84,6 +84,54 @@ describe('module', () => {
           },
           reason: 'a module can have funcs',
         },
+        {
+          wat: `
+            (module
+              (table)
+            )
+          `,
+          value: {
+            type: 'module',
+            definitions: [
+              {
+                type: 'table',
+              },
+            ],
+          },
+          reason: 'a module can have tables',
+        },
+        {
+          wat: `
+            (module
+              (global)
+            )
+          `,
+          value: {
+            type: 'module',
+            definitions: [
+              {
+                type: 'global',
+              },
+            ],
+          },
+          reason: 'a module can have globals',
+        },
+        {
+          wat: `
+            (module
+              (memory 1)
+            )
+          `,
+          value: {
+            type: 'module',
+            definitions: [
+              {
+                type: 'memory',
+              },
+            ],
+          },
+          reason: 'a module can have memory',
+        },
       ])('matched “$wat” due to $reason', ({ wat, value }) => {
         const result = pipe(SexpParser(), module)(wat)
 
@@ -95,7 +143,7 @@ describe('module', () => {
           wat: `
             (module foo)
           `,
-          reason: 'a module names must start with a “$”',
+          reason: 'module names must start with a “$”',
         },
       ])('unmatched “$wat” due to $reason', ({ wat }) => {
         const result = pipe(SexpParser(), module)(wat)
@@ -104,36 +152,104 @@ describe('module', () => {
       })
     })
 
-    describe('name', () => {
-      test('func', () => {
-        const matcher = name
-        const result = matcher({ type: 'value', value: '$f' })
-        expect(result.value).toEqual('$f')
-      })
-    })
+    describe('imports are named and typed', () => {
+      test.each([
+        {
+          wat: `
+            (import "foo" "bar" (func))
+          `,
+          value: {
+            import: {
+              moduleName: 'foo',
+              name: 'bar',
+            },
+            type: 'func',
+          },
+          reason: 'import can declare module name and name before kind type',
+        },
+        {
+          wat: `
+            (func (import "foo" "bar"))
+          `,
+          value: {
+            import: {
+              moduleName: 'foo',
+              name: 'bar',
+            },
+            type: 'func',
+          },
+          reason: 'import can declare kind type before module name and name',
+        },
+        {
+          wat: `
+            (import "foo" "bar" (func $f))
+          `,
+          value: {
+            import: {
+              moduleName: 'foo',
+              name: 'bar',
+            },
+            type: 'func',
+            name: '$f',
+          },
+          reason: 'kind type can be named starting with a “$“',
+        },
+        {
+          wat: `
+            (func $f (import "foo" "bar"))
+          `,
+          value: {
+            import: {
+              moduleName: 'foo',
+              name: 'bar',
+            },
+            type: 'func',
+            name: '$f',
+          },
+          reason: 'kind type can be named starting with a “$“',
+        },
+      ])('matched “$wat” due to $reason', ({ wat, value }) => {
+        const result = pipe(SexpParser(), importDefinition)(wat)
 
-    describe('kind', () => {
-      test('func', () => {
-        const matcher = kind
-        const result = matcher({ type: 'value', value: 'func' })
-        expect(result.value).toEqual('func')
+        expect(result.value).toEqual(value)
       })
-    })
 
-    describe('kindDefinition', () => {
-      test('named func', () => {
-        const matcher = kindDefinition
-        const result = matcher({
-          type: 'sexp',
-          value: [
-            { type: 'value', value: 'func' },
-            { type: 'value', value: '$f' },
-          ],
-        })
-        expect(result.value).toEqual({
-          type: 'func',
-          name: '$f',
-        })
+      test.each([
+        {
+          wat: `
+            (import "foo" "bar")
+          `,
+          reason: 'import must include a kind type',
+        },
+        {
+          wat: `
+            (import "foo" (func))
+          `,
+          reason: 'import include both a module name and name',
+        },
+        {
+          wat: `
+            (func (import "foo")
+          `,
+          reason: 'import include both a module name and name',
+        },
+        // need more precise grammar to handle this case
+        // {
+        //   wat: `
+        //     (import "foo" "bar" (func f))
+        //   `,
+        //   reason: 'kind type name must starts with a “$”',
+        // },
+        {
+          wat: `
+            (func f (import "foo" "bar"))
+          `,
+          reason: 'kind type name must starts with a “$”',
+        },
+      ])('unmatched “$wat” due to $reason', ({ wat }) => {
+        const result = pipe(SexpParser(), importDefinition)(wat)
+
+        expect(result.matched).toBe(false)
       })
     })
   })
