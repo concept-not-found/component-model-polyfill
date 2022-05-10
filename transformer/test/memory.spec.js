@@ -3,7 +3,7 @@ import onedent from '../onedent.js'
 import transformer from '../index.js'
 
 describe('component-transformer', () => {
-  describe('import', () => {
+  describe('memory', () => {
     test('two instances of same module with independent memory', () => {
       const wat = dedent`
         (component (;0;)

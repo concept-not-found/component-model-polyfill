@@ -1,4 +1,4 @@
-import { maybe, some, any, oneOf, when } from 'patcom'
+import { maybe, some, oneOf, when, matchPredicate, rest } from 'patcom'
 
 import { sexp, value, string } from '../../sexp/index.js'
 
@@ -11,6 +11,9 @@ function parseIndex(index) {
 
 const variable = value()
 export const name = value()
+export const identifier = value(
+  matchPredicate((value) => value?.startsWith?.('$') ?? false)
+)
 const anyString = string()
 
 export const kind = oneOf(
@@ -20,7 +23,7 @@ export const kind = oneOf(
   value('global')
 )
 const kindName = [kind, maybe(name)]
-export const kindDefinition = when(sexp(...kindName), ([kind, name]) => {
+export const kindDefinition = when(sexp(...kindName, rest), ([kind, name]) => {
   return {
     type: kind,
     name,
@@ -28,7 +31,7 @@ export const kindDefinition = when(sexp(...kindName), ([kind, name]) => {
 })
 
 const importName = [value('import'), anyString, anyString]
-const importDefinition = when(
+const importFirstDefinition = when(
   sexp(...importName, kindDefinition),
   ([, moduleName, importName, kindDefinition]) => {
     const { type, name } = kindDefinition
@@ -42,6 +45,20 @@ const importDefinition = when(
     }
   }
 )
+const inlineImportDefinition = when(
+  sexp(...kindName, sexp(...importName)),
+  ([type, name, [, moduleName, importName]]) => {
+    return {
+      type,
+      name,
+      import: {
+        moduleName,
+        name: importName,
+      },
+    }
+  }
+)
+const importDefinition = oneOf(importFirstDefinition, inlineImportDefinition)
 
 const kindReference = when(sexp(kind, variable), ([kind, kindIdx]) => {
   return {
@@ -62,14 +79,9 @@ const exportDefinition = when(
   }
 )
 
-const definition = oneOf(
-  importDefinition,
-  kindDefinition,
-  exportDefinition,
-  any
-)
+const definition = oneOf(importDefinition, kindDefinition, exportDefinition)
 export const module = when(
-  sexp(value('module'), maybe(name), maybe(some(definition))),
+  sexp(value('module'), maybe(identifier), maybe(some(definition))),
   (
     [, name, definitions = []],
     {
