@@ -27,7 +27,7 @@ describe('parser', () => {
       const matcher = valueMatcher
       const result = matcher(asInternalIterator(wat))
 
-      expect(result.value).toMatchObject({
+      expect(result.value).toEqual({
         type: 'value',
         value: 'foo',
       })
@@ -79,7 +79,7 @@ describe('parser', () => {
       const matcher = stringMatcher
       const result = matcher(asInternalIterator(wat))
 
-      expect(result.value).toMatchObject({
+      expect(result.value).toEqual({
         type: 'string',
         value,
       })
@@ -136,7 +136,7 @@ describe('parser', () => {
       const matcher = SexpMatcher({ trimTypes: ['whitespace'] })
       const result = matcher(asInternalIterator(wat))
 
-      expect(result.value).toMatchObject({
+      expect(result.value).toEqual({
         type: 'sexp',
         value,
       })
@@ -208,7 +208,7 @@ describe('parser', () => {
         const matcher = SexpMatcher()
         const result = matcher(asInternalIterator(wat))
 
-        expect(result.value).toMatchObject({
+        expect(result.value).toEqual({
           type: 'sexp',
           value: [
             { type: 'value', value: 'some-value' },
@@ -227,7 +227,7 @@ describe('parser', () => {
         const matcher = SexpMatcher({ trimTypes: [] })
         const result = matcher(asInternalIterator(wat))
 
-        expect(result.value).toMatchObject({
+        expect(result.value).toEqual({
           type: 'sexp',
           value: [
             { type: 'value', value: 'some-value' },
@@ -257,7 +257,7 @@ describe('parser', () => {
       const parser = SexpParser()
       const result = parser(wat)
 
-      expect(result).toMatchObject({
+      expect(result).toEqual({
         type: 'sexp',
         value: [
           {
