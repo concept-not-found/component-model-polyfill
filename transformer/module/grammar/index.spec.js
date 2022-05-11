@@ -1,6 +1,6 @@
 import pipe from '../../pipe.js'
 import { Parser as SexpParser } from '../../sexp/index.js'
-import { module, importDefinition } from './index.js'
+import { module, importDefinition, exportDefinition } from './index.js'
 
 describe('module', () => {
   describe('grammar', () => {
@@ -223,7 +223,19 @@ describe('module', () => {
         },
         {
           wat: `
+            (import (func))
+          `,
+          reason: 'import include both a module name and name',
+        },
+        {
+          wat: `
             (import "foo" (func))
+          `,
+          reason: 'import include both a module name and name',
+        },
+        {
+          wat: `
+            (func (import)
           `,
           reason: 'import include both a module name and name',
         },
@@ -232,6 +244,18 @@ describe('module', () => {
             (func (import "foo")
           `,
           reason: 'import include both a module name and name',
+        },
+        {
+          wat: `
+            (import foo bar (func))
+          `,
+          reason: 'import module name and name must be strings',
+        },
+        {
+          wat: `
+            (foo (import foo bar))
+          `,
+          reason: 'import module name and name must be strings',
         },
         // need more precise grammar to handle this case
         // {
@@ -246,8 +270,96 @@ describe('module', () => {
           `,
           reason: 'kind type name must starts with a “$”',
         },
+        // need more precise grammar to handle this case
+        // {
+        //   wat: `
+        //     (import "foo" "bar" (func "$f"))
+        //   `,
+        //   reason: 'kind type name must a value',
+        // },
+        {
+          wat: `
+            (func "$f" (import "foo" "bar"))
+          `,
+          reason: 'kind type name must a value',
+        },
       ])('unmatched “$wat” due to $reason', ({ wat }) => {
         const result = pipe(SexpParser(), importDefinition)(wat)
+
+        expect(result.matched).toBe(false)
+      })
+    })
+
+    describe('exports are named and refer to a kind', () => {
+      test.each([
+        {
+          wat: `
+            (export "foo" (func 0))
+          `,
+          value: {
+            type: 'export',
+            name: 'foo',
+            kindReference: {
+              kind: 'func',
+              kindIdx: 0,
+            },
+          },
+          reason: 'export can declare name before kind reference',
+        },
+        {
+          wat: `
+            (export "foo" (func $f))
+          `,
+          value: {
+            type: 'export',
+            name: 'foo',
+            kindReference: {
+              kind: 'func',
+              kindIdx: '$f',
+            },
+          },
+          reason: 'kind reference can be by name starting with “$“',
+        },
+      ])('matched “$wat” due to $reason', ({ wat, value }) => {
+        const result = pipe(SexpParser(), exportDefinition)(wat)
+
+        expect(result.value).toEqual(value)
+      })
+
+      test.each([
+        {
+          wat: `
+            (export (func))
+          `,
+          reason: 'export must include a name',
+        },
+        {
+          wat: `
+            (export "foo" (func))
+          `,
+          reason:
+            'kind reference must be either an index or name starting with “$”',
+        },
+        {
+          wat: `
+            (export foo (func 0))
+          `,
+          reason: 'export name must be a string',
+        },
+        {
+          wat: `
+            (export "foo" (func "$f"))
+          `,
+          reason: 'kind reference name must be a value',
+        },
+        {
+          wat: `
+            (export "foo")
+          `,
+          reason: 'export must include a kind reference',
+        },
+      ])('unmatched “$wat” due to $reason', ({ wat }) => {
+        const result = pipe(SexpParser(), exportDefinition)(wat)
 
         expect(result.matched).toBe(false)
       })
