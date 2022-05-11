@@ -58,7 +58,11 @@
     "prefer-const": "error",
     "prefer-destructuring": "error",
 
-    "node/file-extension-in-import": ["error"],
+    "import/no-internal-modules": ["error", {
+      "allow": ["**/index.js"]
+    }],
+
+    "node/file-extension-in-import": "error",
     "node/no-extraneous-import": [
       "error",
       {

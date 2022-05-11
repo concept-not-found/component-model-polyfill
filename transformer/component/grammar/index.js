@@ -1,3 +1,5 @@
+import kindCollection from '../../kind-collection.js'
+
 import { group, maybe, some, rest, oneOf, when } from 'patcom'
 
 import { sexp, value, string, reference } from '../../sexp/index.js'
@@ -15,15 +17,8 @@ const variable = value()
 const name = value()
 const anyString = string()
 
-const kind = oneOf(
-  value('func'),
-  value('memory'),
-  value('table'),
-  value('global'),
-  value('component'),
-  value('module'),
-  value('instance')
-)
+const kind = oneOf(...Object.keys(kindCollection).map(value))
+
 const kindName = [kind, maybe(name)]
 const kindDefinition = when(sexp(...kindName), ([type, name]) => {
   return {

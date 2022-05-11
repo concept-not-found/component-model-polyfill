@@ -1,3 +1,4 @@
+import { coreKindCollection } from '../../kind-collection.js'
 import { maybe, some, oneOf, when, matchPredicate, rest } from 'patcom'
 
 import { sexp, value, string } from '../../sexp/index.js'
@@ -15,12 +16,8 @@ const identifier = value(
 )
 const anyString = string()
 
-const kind = oneOf(
-  value('func'),
-  value('memory'),
-  value('table'),
-  value('global')
-)
+const kind = oneOf(...Object.keys(coreKindCollection).map(value))
+
 const kindName = [kind, maybe(identifier)]
 const kindDefinition = when(sexp(...kindName, rest), ([kind, name]) => {
   return {
