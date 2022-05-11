@@ -54,10 +54,7 @@ const inlineImportDefinition = when(
   }
 )
 
-export const importDefinition = oneOf(
-  importFirstDefinition,
-  inlineImportDefinition
-)
+const importDefinition = oneOf(importFirstDefinition, inlineImportDefinition)
 
 const kindReference = when(sexp(kind, variable), ([kind, kindIdx]) => {
   return {
@@ -67,7 +64,7 @@ const kindReference = when(sexp(kind, variable), ([kind, kindIdx]) => {
 })
 
 const exportName = [value('export'), anyString]
-export const exportDefinition = when(
+const exportDefinition = when(
   sexp(...exportName, kindReference),
   ([, name, kindReference]) => {
     return {
@@ -79,7 +76,7 @@ export const exportDefinition = when(
 )
 
 const definition = oneOf(importDefinition, kindDefinition, exportDefinition)
-export const module = when(
+export default when(
   sexp(value('module'), maybe(identifier), maybe(some(definition))),
   (
     [, name, definitions = []],
