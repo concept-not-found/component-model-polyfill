@@ -4,127 +4,218 @@ import { Parser as SexpParser } from '../sexp/index.js'
 import parse from './parser.js'
 import index from './indexer.js'
 
+function path(parts, object) {
+  const original = object
+  try {
+    for (const part of parts) {
+      object = object[part]
+    }
+    return object
+  } catch {
+    throw new Error(
+      `failed to walk path [${parts.join(', ')}] in ${JSON.stringify(
+        original,
+        undefined,
+        2
+      )}`
+    )
+  }
+}
+
 describe('index module', () => {
-  describe('empty func', () => {
-    test('implicit index', () => {
-      const wat = `
-        (module
-          (func)
-        )
-      `
+  test('definitions are indexed into collections in the order in which they appear', () => {
+    const wat = `
+      (module
+        (func $firstFunc)
+        (global $firstGlobal)
+        (func $secondFunc)
+        (global $secondGlobal)
+      )
+    `
 
-      const module = pipe(SexpParser(), parse, index)(wat)
+    const module = pipe(SexpParser(), parse, index)(wat)
 
-      expect(module.funcs[0]).toEqual({
-        type: 'func',
-      })
-    })
-    test('explicit index', () => {
-      const wat = `
-        (module
-          (func $f)
-        )
-      `
-
-      const module = pipe(SexpParser(), parse, index)(wat)
-
-      expect(module.symbolIndex.funcs.$f).toBe(0)
-      expect(module.funcs[0]).toEqual({
-        type: 'func',
-        name: '$f',
-      })
+    expect(module).toEqual({
+      type: 'module',
+      imports: [],
+      funcs: [
+        {
+          type: 'func',
+          name: '$firstFunc',
+        },
+        {
+          type: 'func',
+          name: '$secondFunc',
+        },
+      ],
+      globals: [
+        {
+          type: 'global',
+          name: '$firstGlobal',
+        },
+        {
+          type: 'global',
+          name: '$secondGlobal',
+        },
+      ],
+      memories: [],
+      tables: [],
+      symbolIndex: expect.anything(),
+      exports: [],
     })
   })
 
-  describe('export func', () => {
-    test('implicit index', () => {
-      const wat = `
-        (module
-          (export "ex" (func 0))
-          (func)
-        )
-      `
+  test('definition names are indexed in symbolIndex', () => {
+    const wat = `
+      (module
+        (func)
+        (func $secondFuncIsIndex1)
+      )
+    `
 
-      const module = pipe(SexpParser(), parse, index)(wat)
+    const module = pipe(SexpParser(), parse, index)(wat)
 
-      expect(module.exports).toEqual([
+    expect(module).toEqual({
+      type: 'module',
+      imports: [],
+      funcs: [
+        {
+          type: 'func',
+        },
+        {
+          type: 'func',
+          name: '$secondFuncIsIndex1',
+        },
+      ],
+      globals: [],
+      memories: [],
+      tables: [],
+      symbolIndex: {
+        funcs: {
+          $secondFuncIsIndex1: 1,
+        },
+        globals: {},
+        memories: {},
+        tables: {},
+      },
+      exports: [],
+    })
+  })
+
+  test('imports take up index space in the collection and are also in their own collection', () => {
+    const wat = `
+      (module
+        (func (import "mod" "f"))
+        (func)
+        (import "mod" "g" (func))
+      )
+    `
+
+    const module = pipe(SexpParser(), parse, index)(wat)
+
+    expect(module).toEqual({
+      type: 'module',
+      imports: [
+        {
+          type: 'func',
+          import: {
+            moduleName: 'mod',
+            name: 'f',
+          },
+        },
+        {
+          type: 'func',
+          import: {
+            moduleName: 'mod',
+            name: 'g',
+          },
+        },
+      ],
+      funcs: [
+        {
+          type: 'func',
+          import: {
+            moduleName: 'mod',
+            name: 'f',
+          },
+        },
+        {
+          type: 'func',
+        },
+        {
+          type: 'func',
+          import: {
+            moduleName: 'mod',
+            name: 'g',
+          },
+        },
+      ],
+      globals: [],
+      memories: [],
+      tables: [],
+      symbolIndex: expect.anything(),
+      exports: [],
+    })
+  })
+
+  test('exports are in their own collection and path() is an array of path parts in module to the exported definition', () => {
+    const wat = `
+      (module
+        (func)
+        (export "foo" (func 0))
+        (global $g)
+        (export "bar" (global $g))
+      )
+    `
+
+    const module = pipe(SexpParser(), parse, index)(wat)
+
+    expect(module).toEqual({
+      type: 'module',
+      imports: [],
+      funcs: [
+        {
+          type: 'func',
+        },
+      ],
+      globals: [
+        {
+          type: 'global',
+          name: '$g',
+        },
+      ],
+      memories: [],
+      tables: [],
+      symbolIndex: expect.anything(),
+      exports: [
         {
           type: 'export',
-          name: 'ex',
+          name: 'foo',
           kindReference: {
             kind: 'func',
             kindIdx: 0,
           },
         },
-      ])
-      expect(module.exports[0].path()).toEqual(['funcs', 0])
-    })
-
-    test('explicit index', () => {
-      const wat = `
-        (module
-          (export "ex" (func $f))
-          (func $f)
-        )
-      `
-
-      const module = pipe(SexpParser(), parse, index)(wat)
-
-      expect(module.exports).toEqual([
         {
           type: 'export',
-          name: 'ex',
+          name: 'bar',
           kindReference: {
-            kind: 'func',
-            kindIdx: '$f',
+            kind: 'global',
+            kindIdx: '$g',
           },
         },
-      ])
-      expect(module.exports[0].path()).toEqual(['funcs', 0])
-    })
-  })
-
-  describe('import func', () => {
-    test('implicit index', () => {
-      const wat = `
-        (module
-          (import "mod" "im" (func))
-        )
-      `
-
-      const module = pipe(SexpParser(), parse, index)(wat)
-
-      const expectedImportFunc = {
-        type: 'func',
-        import: {
-          moduleName: 'mod',
-          name: 'im',
-        },
-      }
-      expect(module.funcs[0]).toEqual(expectedImportFunc)
-      expect(module.imports).toEqual([expectedImportFunc])
+      ],
     })
 
-    test('explicit index', () => {
-      const wat = `
-        (module
-          (import "mod" "im" (func $f))
-        )
-      `
+    expect(module.exports[0].path()).toEqual(['funcs', 0])
+    expect(path(module.exports[0].path(), module)).toEqual({
+      type: 'func',
+    })
 
-      const module = pipe(SexpParser(), parse, index)(wat)
-
-      expect(module.symbolIndex.funcs.$f).toBe(0)
-      const expectedImportFunc = {
-        type: 'func',
-        name: '$f',
-        import: {
-          moduleName: 'mod',
-          name: 'im',
-        },
-      }
-      expect(module.funcs[0]).toEqual(expectedImportFunc)
-      expect(module.imports).toEqual([expectedImportFunc])
+    expect(module.exports[1].path()).toEqual(['globals', 0])
+    expect(path(module.exports[1].path(), module)).toEqual({
+      type: 'global',
+      name: '$g',
     })
   })
 })
