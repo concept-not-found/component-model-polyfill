@@ -1,5 +1,5 @@
 import pipe from '../pipe.js'
-import { Parser as SexParser } from '../sexp/index.js'
+import { Parser as SexpParser } from '../sexp/index.js'
 
 import parse from './parser.js'
 import index from './indexer.js'
@@ -18,9 +18,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.modules[1].path()).toEqual([
           'instances',
@@ -41,9 +39,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.modules[1].path()).toEqual([
           'instances',
@@ -65,9 +61,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         const ancestors = [component, component.modules[1]]
         expect(component.components[0].modules[0].path(ancestors)).toEqual([
@@ -87,9 +81,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         const ancestors = [component, component.modules[1]]
         expect(component.components[0].modules[0].path(ancestors)).toEqual([

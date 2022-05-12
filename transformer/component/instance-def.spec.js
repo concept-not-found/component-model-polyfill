@@ -14,9 +14,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[0]).toEqual({
           type: 'instance',
@@ -34,9 +32,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[0]).toEqual({
           type: 'instance',
@@ -58,9 +54,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(
           component.instances[0].instanceExpression.componentPath()
@@ -75,9 +69,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(
           component.instances[0].instanceExpression.componentPath()
@@ -98,9 +90,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[0].instanceExpression.arguments).toEqual([
           {
@@ -129,9 +119,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[0].instanceExpression.arguments).toEqual([
           {
@@ -163,9 +151,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(
           component.instances[0].instanceExpression.arguments[0].reference.path()
@@ -185,9 +171,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(
           component.instances[0].instanceExpression.arguments[0].reference.path()
@@ -206,9 +190,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[0].instanceExpression.exports[0]).toEqual({
           name: 'ex',
@@ -233,9 +215,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[0].instanceExpression.exports[0]).toEqual({
           name: 'ex',
@@ -262,9 +242,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(
           component.instances[0].instanceExpression.exports[0].reference.path()
@@ -281,9 +259,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(
           component.instances[0].instanceExpression.exports[0].reference.path()
@@ -301,9 +277,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[0]).toEqual({
           type: 'instance',
@@ -333,9 +307,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.symbolIndex.instances.$i).toBe(0)
         expect(component.instances[0]).toEqual({
@@ -370,9 +342,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.instances[1]).toEqual({
           type: 'instance',
@@ -394,9 +364,7 @@ describe('index component', () => {
           )
         `
 
-        const sexpParser = SexpParser()
-        const component = pipe(sexpParser, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.symbolIndex.instances.$i).toBe(1)
         expect(component.instances[1]).toEqual({

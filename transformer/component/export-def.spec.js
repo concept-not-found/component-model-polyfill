@@ -15,9 +15,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.exports).toEqual([
           {
@@ -43,9 +41,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.exports).toEqual([
           {

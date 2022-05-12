@@ -14,9 +14,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.components[0]).toEqual({
           type: 'component',
@@ -48,9 +46,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.symbolIndex.components.$M).toBe(0)
         expect(component.components[0]).toEqual({
@@ -86,9 +82,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.modules[0]).toEqual({
           type: 'module',
@@ -114,9 +108,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.symbolIndex.modules.$M).toBe(0)
         expect(component.modules[0]).toEqual({
@@ -146,9 +138,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.modules[0]).toEqual({
           type: 'module',
@@ -175,9 +165,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.symbolIndex.modules.$M).toBe(0)
         expect(component.modules[0]).toEqual({
@@ -209,9 +197,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.modules[0]).toEqual({
           type: 'module',
@@ -230,9 +216,7 @@ describe('index component', () => {
           )
         `
 
-        const parseSexp = SexpParser()
-        const component = pipe(parseSexp, parse)(wat)
-        index(component)
+        const component = pipe(SexpParser(), parse, index)(wat)
 
         expect(component.symbolIndex.modules.$M).toBe(0)
         expect(component.modules[0]).toEqual({
