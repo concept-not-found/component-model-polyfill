@@ -210,7 +210,6 @@ describe('module', () => {
         },
       ])('matched “$wat” due to $reason', ({ wat, value }) => {
         const result = pipe(SexpParser(), module)(`(module ${wat})`)
-        console.dir(result, { depth: 10 })
 
         expect(result.value.definitions[0]).toEqual(value)
       })
