@@ -397,7 +397,7 @@ const definition = oneOf(
   sexp(rest)
 )
 
-export const component = when(
+const component = when(
   sexp(value('component'), maybe(name), maybe(some(definition)), rest),
   ([, name, definitions = []]) => {
     return {
@@ -408,3 +408,5 @@ export const component = when(
   }
 )
 componentReference.matcher = component
+
+export default component
