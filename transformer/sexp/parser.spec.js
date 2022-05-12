@@ -1,63 +1,32 @@
-import { asInternalIterator } from 'patcom'
-
-import SexpParser, {
-  valueMatcher,
-  stringMatcher,
-  SexpMatcher,
-  blockCommentMatcher,
-  lineCommentMatcher,
-} from './parser.js'
+import Parser from './parser.js'
 
 describe('parser', () => {
-  describe('valueMatcher matches everything until a deliminator', () => {
+  describe('values are deliminated', () => {
     test.each([
-      { wat: 'foo', deliminator: 'end of file' },
-      { wat: 'foo(bar', deliminator: 'start of sexp' },
-      { wat: 'foo)bar', deliminator: 'end of sexp' },
-      { wat: 'foo bar', deliminator: 'whitespace' },
-      { wat: 'foo\tbar', deliminator: 'whitespace' },
-      { wat: 'foo\r\nbar', deliminator: 'whitespace' },
-      { wat: 'foo\rbar', deliminator: 'whitespace' },
-      { wat: 'foo\nbar', deliminator: 'whitespace' },
-      { wat: 'foo"bar', deliminator: 'string' },
-      { wat: 'foo(;bar', deliminator: 'start of block comment' },
-      { wat: 'foo;)bar', deliminator: 'end of block comment' },
-      { wat: 'foo;;bar', deliminator: 'line comment' },
-    ])('matched “$wat” as “foo” due to $deliminator deliminator', ({ wat }) => {
-      const matcher = valueMatcher
-      const result = matcher(asInternalIterator(wat))
-
-      expect(result.value).toEqual({
-        type: 'value',
-        value: 'foo',
-      })
-    })
-
-    test.each([
-      { wat: '', deliminator: 'end of file' },
-      { wat: '(foo', deliminator: 'start of sexp' },
-      { wat: ')foo', deliminator: 'end of sexp' },
-      { wat: ' foo', deliminator: 'whitespace' },
-      { wat: '\tfoo', deliminator: 'whitespace' },
-      { wat: '\r\nfoo', deliminator: 'whitespace' },
-      { wat: '\rfoo', deliminator: 'whitespace' },
-      { wat: '\nfoo', deliminator: 'whitespace' },
-      { wat: '"foo', deliminator: 'string' },
-      { wat: '(;foo', deliminator: 'start of block comment' },
-      { wat: ';)foo', deliminator: 'end of block comment' },
-      { wat: ';;foo', deliminator: 'line comment' },
+      { wat: '(foo())', deliminator: 'start of sexp' },
+      { wat: '(foo)', deliminator: 'end of sexp' },
+      { wat: '(foo ())', deliminator: 'whitespace' },
+      { wat: '(foo\t())', deliminator: 'whitespace' },
+      { wat: '(foo\r\n())', deliminator: 'whitespace' },
+      { wat: '(foo\r())', deliminator: 'whitespace' },
+      { wat: '(foo\n())', deliminator: 'whitespace' },
+      { wat: '(foo"")', deliminator: 'string' },
+      { wat: '(foo(;;))', deliminator: 'start of block comment' },
+      { wat: '(foo;;\n)', deliminator: 'line comment' },
     ])(
-      'unmatched “$wat” as starts with $deliminator deliminator',
+      'first item in “$wat” is value “foo” due to $deliminator deliminator',
       ({ wat }) => {
-        const matcher = valueMatcher
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser()(wat)
 
-        expect(result.matched).toBe(false)
+        expect(result.value[0]).toEqual({
+          type: 'value',
+          value: 'foo',
+        })
       }
     )
   })
 
-  describe('stringMatcher matches anything between double quotes “"”', () => {
+  describe('strings are anything between double quotes “"”', () => {
     test.each([
       { wat: '""', value: '', reason: 'empty string' },
       {
@@ -76,28 +45,25 @@ describe('parser', () => {
         reason: 'double quotes “"” being escaped with “\\"”',
       },
     ])('matched “$wat” as “$value” due to $reason', ({ wat, value }) => {
-      const matcher = stringMatcher
-      const result = matcher(asInternalIterator(wat))
+      const result = Parser()(`(${wat})`)
 
-      expect(result.value).toEqual({
+      expect(result.value[0]).toEqual({
         type: 'string',
         value,
       })
     })
 
-    test.each([
-      { wat: 'foo', reason: 'missing double quotes' },
-      { wat: '"foo', reason: 'missing end double quote' },
-      { wat: 'foo"', reason: 'missing start double quote' },
-    ])('unmatched “$wat” due to $reason', ({ wat }) => {
-      const matcher = stringMatcher
-      const result = matcher(asInternalIterator(wat))
+    test.each([{ wat: '"foo', reason: 'missing end double quote' }])(
+      'fails to parse “$wat” due to $reason',
+      ({ wat }) => {
+        const result = Parser()(`(${wat})`)
 
-      expect(result.matched).toBe(false)
-    })
+        expect(result).toBe(undefined)
+      }
+    )
   })
 
-  describe('SexpMatcher matches nested items between left parenthesis “(” and right parenthesis “)”', () => {
+  describe('sexp matches nested items between left parenthesis “(” and right parenthesis “)”', () => {
     test.each([
       { wat: '()', value: [], reason: 'sexp nests nothing' },
       {
@@ -132,11 +98,20 @@ describe('parser', () => {
         ],
         reason: 'sexp can nest items of all kinds',
       },
-    ])('matched “$wat” as $reason', ({ wat, value }) => {
-      const matcher = SexpMatcher({ trimTypes: ['whitespace'] })
-      const result = matcher(asInternalIterator(wat))
+      {
+        wat: ' (note-leading-and-trailing-whitespace) ',
+        value: [
+          {
+            type: 'value',
+            value: 'note-leading-and-trailing-whitespace',
+          },
+        ],
+        reason: 'surrounding whitespace is ignored',
+      },
+    ])('parses “$wat” due to $reason', ({ wat, value }) => {
+      const result = Parser({ trimTypes: ['whitespace'] })(wat)
 
-      expect(result.value).toEqual({
+      expect(result).toEqual({
         type: 'sexp',
         value,
       })
@@ -146,26 +121,25 @@ describe('parser', () => {
       { wat: 'foo)', reason: 'missing starting left parenthesis “(”' },
       { wat: '(foo', reason: 'missing ending right parenthesis “)”' },
       { wat: ')(', reason: 'cannot start with right parenthesis “)”' },
-    ])('unmatched “$wat” as $reason', ({ wat }) => {
-      const matcher = SexpMatcher()
-      const result = matcher(asInternalIterator(wat))
+      { wat: 'value', reason: 'top-level item must be a sexp' },
+      { wat: '(first)(second)', reason: 'too many top-level sexps' },
+    ])('fails to parse “$wat” due to $reason', ({ wat }) => {
+      const result = Parser()(wat)
 
-      expect(result.matched).toBe(false)
+      expect(result).toBe(undefined)
     })
 
     describe('sourceTags option captures original source of sexp to the source field, when first nested value is in the sourceTags array', () => {
       test('by default nothing is capatured if no sourceTags are provided', () => {
         const wat = '(some-tag some-value\nsome-value-after-newline)'
-        const matcher = SexpMatcher()
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser()(wat)
 
         expect(result.source).toBeUndefined()
       })
 
       test('original source including whitespace is captured when tag is within sourceTags', () => {
         const wat = '(some-tag some-value\nsome-value-after-newline)'
-        const matcher = SexpMatcher({ sourceTags: ['some-tag'] })
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser({ sourceTags: ['some-tag'] })(wat)
 
         expect(result.source).toBe(
           '(some-tag some-value\nsome-value-after-newline)'
@@ -174,30 +148,27 @@ describe('parser', () => {
 
       test('nested sexp source can be captured', () => {
         const wat = '(some-containg-sexp (some-tag some-value))'
-        const matcher = SexpMatcher({ sourceTags: ['some-tag'] })
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser({ sourceTags: ['some-tag'] })(wat)
 
         expect(result.source).toBeUndefined()
-        expect(result.value.value[1].source).toBe('(some-tag some-value)')
+        expect(result.value[1].source).toBe('(some-tag some-value)')
       })
 
       test('multiple sourceTags can be provided to capture different sexp', () => {
         const wat = '((first-tag) (second-tag) (but-not-third-tag))'
-        const matcher = SexpMatcher({ sourceTags: ['first-tag', 'second-tag'] })
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser({ sourceTags: ['first-tag', 'second-tag'] })(wat)
 
-        expect(result.value.value[0].source).toBe('(first-tag)')
-        expect(result.value.value[1].source).toBe('(second-tag)')
-        expect(result.value.value[2].source).toBeUndefined()
+        expect(result.value[0].source).toBe('(first-tag)')
+        expect(result.value[1].source).toBe('(second-tag)')
+        expect(result.value[2].source).toBeUndefined()
       })
 
       test('a single sourceTags can capture different sexp', () => {
         const wat = '((some-tag some-value) (some-tag some-other-value))'
-        const matcher = SexpMatcher({ sourceTags: ['some-tag'] })
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser({ sourceTags: ['some-tag'] })(wat)
 
-        expect(result.value.value[0].source).toBe('(some-tag some-value)')
-        expect(result.value.value[1].source).toBe('(some-tag some-other-value)')
+        expect(result.value[0].source).toBe('(some-tag some-value)')
+        expect(result.value[1].source).toBe('(some-tag some-other-value)')
       })
     })
 
@@ -205,10 +176,9 @@ describe('parser', () => {
       test('by default block comment, line comment and whitespace are removed', () => {
         const wat =
           '(some-value "some string" (some-nested-sexp) (;block comment;) ;;line comment\n)'
-        const matcher = SexpMatcher()
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser()(wat)
 
-        expect(result.value).toEqual({
+        expect(result).toEqual({
           type: 'sexp',
           value: [
             { type: 'value', value: 'some-value' },
@@ -224,10 +194,9 @@ describe('parser', () => {
       test('everything can be retained by trimming no types', () => {
         const wat =
           '(some-value "some string" (some-nested-sexp) (;block comment;) ;;line comment\n)'
-        const matcher = SexpMatcher({ trimTypes: [] })
-        const result = matcher(asInternalIterator(wat))
+        const result = Parser({ trimTypes: [] })(wat)
 
-        expect(result.value).toEqual({
+        expect(result).toEqual({
           type: 'sexp',
           value: [
             { type: 'value', value: 'some-value' },
@@ -251,35 +220,7 @@ describe('parser', () => {
     })
   })
 
-  describe('SexpParser parses a single sexp', () => {
-    test('surrounding whitespace is ignored', () => {
-      const wat = ' (note-leading-and-trailing-whitespace) '
-      const parser = SexpParser()
-      const result = parser(wat)
-
-      expect(result).toEqual({
-        type: 'sexp',
-        value: [
-          {
-            type: 'value',
-            value: 'note-leading-and-trailing-whitespace',
-          },
-        ],
-      })
-    })
-
-    test.each([
-      { wat: 'value', reason: 'top-level item must be a sexp' },
-      { wat: '(first)(second)', reason: 'too many top-level sexps' },
-    ])('fails to parse $wat due to $reason', ({ wat }) => {
-      const parser = SexpParser()
-      const result = parser(wat)
-
-      expect(result).toBeUndefined()
-    })
-  })
-
-  describe('blockCommentMatcher matches multi-line comments surrounded by “(;” and “;)”', () => {
+  describe('block comments are multi-line comments surrounded by “(;” and “;)”', () => {
     test.each([
       { wat: '(;;)', value: [], reason: 'block comment able to be empty' },
       {
@@ -325,10 +266,9 @@ describe('parser', () => {
         reason: 'block comment taking presedent over line comment',
       },
     ])('matched “$wat” due to $reason', ({ wat, value }) => {
-      const matcher = blockCommentMatcher
-      const result = matcher(asInternalIterator(wat))
+      const result = Parser({ trimTypes: ['whitespace'] })(`(${wat})`)
 
-      expect(result.value).toEqual({
+      expect(result.value[0]).toEqual({
         type: 'block comment',
         value,
       })
@@ -351,45 +291,42 @@ describe('parser', () => {
         wat: '(;(;foo;)',
         reason: 'block comment requiring proper nesting',
       },
+      {
+        wat: '(;foo;);)',
+        reason: 'block comment requiring proper nesting',
+      },
     ])('unmatched “$wat” due to $reason', ({ wat, value }) => {
-      const matcher = blockCommentMatcher
-      const result = matcher(asInternalIterator(wat))
+      const result = Parser()(`(${wat})`)
 
-      expect(result.matched).toBe(false)
+      expect(result).toBe(undefined)
     })
   })
 
-  describe('lineCommentMatcher matches anything between “;;“ and end of line', () => {
+  describe('line comments are anything between “;;“ and end of line', () => {
     test.each([
-      { wat: ';;\n', value: '', reason: 'line comment able to match empty' },
+      { wat: '(;;\n)', value: '', reason: 'line comment able to match empty' },
       {
-        wat: ';;foo (bar) (;baz;)\n',
+        wat: '(;;foo (bar) (;baz;)\n)',
         value: 'foo (bar) (;baz;)',
         reason: 'line comment able to match anything',
       },
-      {
-        wat: ';;foo',
-        value: 'foo',
-        reason: 'end of file counts as end of line',
-      },
-    ])('matched “$wat” as “$value” due to $reason', ({ wat, value }) => {
-      const matcher = lineCommentMatcher
-      const result = matcher(asInternalIterator(wat))
+    ])('parses “$wat” as “$value” due to $reason', ({ wat, value }) => {
+      const result = Parser({ trimTypes: [] })(wat)
 
-      expect(result.value).toEqual({
+      expect(result.value[0]).toEqual({
         type: 'line comment',
         value,
       })
     })
 
-    test.each([{ wat: 'foo\n', reason: 'missing line comment start “;;”' }])(
-      'unmatched “$wat” due to $reason',
-      ({ wat }) => {
-        const matcher = lineCommentMatcher
-        const result = matcher(asInternalIterator(wat))
+    test('parses “();; foo” due to end of file counts as end of line', () => {
+      const wat = '();; foo'
+      const result = Parser({ trimTypes: [] })(wat)
 
-        expect(result.matched).toBe(false)
-      }
-    )
+      expect(result).toEqual({
+        type: 'sexp',
+        value: [],
+      })
+    })
   })
 })

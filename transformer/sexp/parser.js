@@ -31,14 +31,14 @@ const deliminators = oneOf(
   blockCommentEnd,
   lineCommentStart
 )
-export const valueMatcher = when(some(not(deliminators)), (value) => {
+const valueMatcher = when(some(not(deliminators)), (value) => {
   return {
     type: 'value',
     value: value.join(''),
   }
 })
 
-export const stringMatcher = when(
+const stringMatcher = when(
   group(
     stringDeliminator,
     maybe(some(oneOf(group('\\', '"'), not(stringDeliminator)))),
@@ -61,7 +61,7 @@ const whitespaceMatcher = when(some(whitespace), (value) => {
 
 const nestedBlockComment = reference()
 
-export const blockCommentMatcher = when(
+const blockCommentMatcher = when(
   group(blockCommentStart, maybe(some(nestedBlockComment)), blockCommentEnd),
   ([, value = []]) => {
     return {
@@ -93,7 +93,7 @@ const endOfFile = IteratorMatcher((iterator) => {
   }
 })
 
-export const lineCommentMatcher = when(
+const lineCommentMatcher = when(
   group(
     lineCommentStart,
     maybe(some(not(lineEnding))),
@@ -145,7 +145,7 @@ const Sourceable =
       )
     })
 
-export const SexpMatcher = ({
+const SexpMatcher = ({
   sourceTags,
   trimTypes = ['block comment', 'line comment', 'whitespace'],
 } = {}) => {
@@ -181,9 +181,17 @@ export default (...parameters) =>
     match(asInternalIterator(wat))(
       when(
         group(
-          maybe(whitespaceMatcher),
+          maybe(
+            some(
+              oneOf(whitespaceMatcher, blockCommentMatcher, lineCommentMatcher)
+            )
+          ),
           maybe(SexpMatcher(...parameters)),
-          maybe(whitespaceMatcher),
+          maybe(
+            some(
+              oneOf(whitespaceMatcher, blockCommentMatcher, lineCommentMatcher)
+            )
+          ),
           endOfFile
         ),
         ([, sexp]) => sexp
