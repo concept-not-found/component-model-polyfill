@@ -1,8 +1,12 @@
+import { match } from 'patcom'
 import pipe from '../pipe.js'
+
 import { Parser as SexpParser } from '../sexp/index.js'
 
-import parse from './parser.js'
+import module from './grammar/index.js'
 import index from './indexer.js'
+
+const parse = (wat) => match(wat)(module)
 
 function path(parts, object) {
   const original = object
