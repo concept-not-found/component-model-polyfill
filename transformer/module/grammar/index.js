@@ -11,7 +11,7 @@ function parseIndex(index) {
 }
 
 const variable = value()
-const identifier = value(
+export const identifier = value(
   matchPredicate((value) => value?.startsWith?.('$') ?? false)
 )
 const anyString = string()
