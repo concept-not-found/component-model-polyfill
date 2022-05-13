@@ -4,7 +4,7 @@ import { group, maybe, some, rest, oneOf, when } from 'patcom'
 
 import { sexp, value, string, reference } from '../../sexp/index.js'
 
-import { module } from '../../module/index.js'
+import { module, identifier } from '../../module/index.js'
 
 function parseIndex(index) {
   if (index.startsWith('$')) {
@@ -14,12 +14,11 @@ function parseIndex(index) {
 }
 
 const variable = value()
-const name = value()
 const anyString = string()
 
 const kind = oneOf(...Object.keys(kindCollection).map(value))
 
-const kindName = [kind, maybe(name)]
+const kindName = [kind, maybe(identifier)]
 const kindDefinition = when(sexp(...kindName), ([type, name]) => {
   return {
     type,
@@ -39,7 +38,7 @@ const exportType = when(
 )
 
 const instanceType = when(
-  sexp(value('instance'), maybe(name), maybe(some(exportType))),
+  sexp(value('instance'), maybe(identifier), maybe(some(exportType))),
   ([, name, exports = []]) => {
     return {
       type: 'instance',
@@ -56,7 +55,7 @@ const importType = sexp(value('import'), anyString, kindTypeReference)
 const componentType = when(
   sexp(
     value('component'),
-    maybe(name),
+    maybe(identifier),
     maybe(some(importType)),
     maybe(some(exportType))
   ),
@@ -72,7 +71,7 @@ const componentType = when(
 const moduleType = when(
   sexp(
     value('module'),
-    maybe(name),
+    maybe(identifier),
     maybe(some(importType)),
     maybe(some(exportType))
   ),
@@ -92,7 +91,7 @@ const coreKind = oneOf(
   value('table'),
   value('global')
 )
-const coreKindName = [coreKind, maybe(name)]
+const coreKindName = [coreKind, maybe(identifier)]
 const coreKindType = when(sexp(...coreKindName, rest), ([type, name]) => {
   return {
     type,
@@ -123,7 +122,7 @@ const inlineImport = when(sexp(...importName), ([, name]) => {
 })
 
 const coreKindTypeInlineImport = when(
-  sexp(coreKind, maybe(name), inlineImport, rest),
+  sexp(coreKind, maybe(identifier), inlineImport, rest),
   ([type, name, imp]) => {
     return {
       type,
@@ -134,7 +133,12 @@ const coreKindTypeInlineImport = when(
 )
 
 const instanceTypeInlineImport = when(
-  sexp(value('instance'), maybe(name), inlineImport, maybe(some(exportType))),
+  sexp(
+    value('instance'),
+    maybe(identifier),
+    inlineImport,
+    maybe(some(exportType))
+  ),
   ([, name, imp, exports = []]) => {
     return {
       type: 'instance',
@@ -151,7 +155,7 @@ const instanceTypeInlineImport = when(
 const componentTypeInlineImport = when(
   sexp(
     value('component'),
-    maybe(name),
+    maybe(identifier),
     inlineImport,
     maybe(some(importType)),
     maybe(some(exportType))
@@ -170,7 +174,7 @@ const componentTypeInlineImport = when(
 const moduleTypeInlineImport = when(
   sexp(
     value('module'),
-    maybe(name),
+    maybe(identifier),
     inlineImport,
     maybe(some(importType)),
     maybe(some(exportType))
@@ -335,7 +339,7 @@ const instanceExpression = oneOf(
   instanceTupling
 )
 const instanceDefinition = when(
-  sexp(value('instance'), maybe(name), instanceExpression),
+  sexp(value('instance'), maybe(identifier), instanceExpression),
   ([, name, instanceExpression]) => {
     return {
       type: 'instance',
@@ -393,12 +397,11 @@ const definition = oneOf(
   aliasDefinition,
   exportDefinition,
   module,
-  componentReference,
-  sexp(rest)
+  componentReference
 )
 
 const component = when(
-  sexp(value('component'), maybe(name), maybe(some(definition)), rest),
+  sexp(value('component'), maybe(identifier), maybe(some(definition))),
   ([, name, definitions = []]) => {
     return {
       type: 'component',
